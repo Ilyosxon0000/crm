@@ -26,5 +26,7 @@ pip install -r requirements.txt
 Create a .env file in the project directory and set the necessary environment variables. In this case, you mentioned changing the DEPLOY variable to True:
 
 ```bash
-echo "DEPLOY=True" > .env
+SECRET_KEY = 'Django-SECRET_KEY'
+DEBUG = False
+DEPLOY = True
 ```
