@@ -158,6 +158,14 @@ class AdminView(ModelViewSet):
         if self.action == 'update':
             return AdminUpdateSerializer
         return AdminSerializer
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response({"message":"success"},status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        instance.delete()
 
 class TeacherView(ModelViewSet):
     queryset=Teacher.objects.all()
@@ -167,6 +175,14 @@ class TeacherView(ModelViewSet):
         if self.action == 'update':
             return TeacherUpdateSerializer
         return TeacherSerializer
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response({"message":"deleted"},status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        instance.delete()
 
 class EmployerView(ModelViewSet):
     queryset=Employer.objects.all()
@@ -176,6 +192,13 @@ class EmployerView(ModelViewSet):
         if self.action == 'update':
             return EmployerUpdateSerializer
         return EmployerSerializer
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response({"message":"deleted"},status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        instance.delete()
 
 class StudentView(ModelViewSet):
     queryset=Student.objects.all()
@@ -185,6 +208,14 @@ class StudentView(ModelViewSet):
         if self.action == 'update':
             return StudentUpdateSerializer
         return StudentSerializer
+    
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response({"message":"deleted"},status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        instance.delete()
 
 class ParentView(ModelViewSet):
     queryset=Parent.objects.all()
@@ -194,6 +225,14 @@ class ParentView(ModelViewSet):
         if self.action == 'update':
             return ParentUpdateSerializer
         return ParentSerializer
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response({"message":"deleted"},status=status.HTTP_204_NO_CONTENT)
+
+    def perform_destroy(self, instance):
+        instance.delete()
 
 class ChatRoomeView(ModelViewSet):
     queryset=Chat_room.objects.all()
@@ -227,5 +266,5 @@ class DavomatView(ModelViewSet):
     #         return self.get_paginated_response(serializer.data)
 
     #     serializer = self.get_serializer(queryset, many=True)
-    #     return Response(serializer.data)
+    #     return Response(serializer.data)  
     # filterset_fields=["user","davomat",'date']
