@@ -12,7 +12,7 @@ Clone this repository to your local machine using the following command:
 
 ```bash
 git clone https://github.com/your-username/crm-backend.git
-
+```
 ### 2. Install requirements🗄️
 
 Install requirements.txt packages with pip:
@@ -20,10 +20,11 @@ Install requirements.txt packages with pip:
 ```bash
 cd core
 pip install -r requirements.txt
-
+```
 ### 3. Configure Environment Variables ⚙️
 
 Create a .env file in the project directory and set the necessary environment variables. In this case, you mentioned changing the DEPLOY variable to True:
 
 ```bash
 echo "DEPLOY=True" > .env
+```
