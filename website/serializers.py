@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Type_of_Admin,Permission,Admin,Teacher,Employer,Student,Parent,Chat_room,Message,Davomat
+from .models import Science, Type_of_Admin,Permission,Admin,Teacher,Employer,Student,Parent,Chat_room,Message,Davomat
 from django.contrib.auth.models import User
 
 def get_user(self, obj):
@@ -13,16 +13,17 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model=User
         fields=("id","username","email","first_name")
-
+        
 class SecondUserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(required=False, style={"input_type": "password"},write_only=True)
     class Meta:
         model = User
         fields = ('id', 'username', 'password')
-        extra_kwargs = {'password': {'write_only': True}}
+        extra_kwargs = {'password': {'write_only': True},'first_name': {'write_only': True}}
 
     def create(self, validated_data):
         password = validated_data.pop('password')
-        user = User.objects.create(**validated_data)
+        user = User.objects.create_user(**validated_data)
         user.set_password(password)
         user.save()
         return user
@@ -48,12 +49,16 @@ class AdminSerializer(serializers.ModelSerializer):
         fields="__all__"
 
     def create(self, validated_data):
-        permissions = validated_data.pop('permission', None)
+        permissions = validated_data.pop('permissions', None)
         user_profile_data = validated_data.pop('user')
-        user = User.objects.create(**user_profile_data)
+        user = User.objects.create_user(**user_profile_data)
+        user.set_password(user_profile_data['password'])
+        user.save()
         document = Admin.objects.create(user=user, **validated_data)
         if permissions:
             document.permissions.set(permissions)
+        user.first_name=document.types.slug
+        user.save()
         return document
       
     def get_type_dict(self, obj):
@@ -98,6 +103,11 @@ class AdminUpdateSerializer(serializers.ModelSerializer):
         else:
             return []
 
+class Scince_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model=Science
+        fields="__all__"
+
 class TeacherSerializer(serializers.ModelSerializer):
     user=SecondUserSerializer()
     class Meta:
@@ -105,7 +115,10 @@ class TeacherSerializer(serializers.ModelSerializer):
         fields="__all__"
     def create(self, validated_data):
         user_profile_data = validated_data.pop('user')
-        user = User.objects.create(**user_profile_data)
+        user = User.objects.create_user(**user_profile_data)
+        user.set_password(user_profile_data['password'])
+        user.first_name="teacher"
+        user.save()
         document = Teacher.objects.create(user=user, **validated_data)
         return document
     
@@ -122,7 +135,10 @@ class EmployerSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user_profile_data = validated_data.pop('user')
-        user = User.objects.create(**user_profile_data)
+        user = User.objects.create_user(**user_profile_data)
+        user.set_password(user_profile_data['password'])
+        user.first_name="employer"
+        user.save()
         document = Student.objects.create(user=user, **validated_data)
         return document
     
@@ -139,7 +155,10 @@ class StudentSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         user_profile_data = validated_data.pop('user')
-        user = User.objects.create(**user_profile_data)
+        user = User.objects.create_user(**user_profile_data)
+        user.set_password(user_profile_data['password'])
+        user.first_name="student"
+        user.save()
         document = Student.objects.create(user=user, **validated_data)
         return document
     
@@ -160,7 +179,10 @@ class ParentSerializer(serializers.ModelSerializer):
         children = validated_data.pop('children', None)
         print(children)
         user_profile_data = validated_data.pop('user')
-        user = User.objects.create(**user_profile_data)
+        user = User.objects.create_user(**user_profile_data)
+        user.set_password(user_profile_data['password'])
+        user.first_name="parent"
+        user.save()
         document = Parent.objects.create(user=user, **validated_data)
         if children:
             document.children.set(children)

@@ -23,3 +23,9 @@ urlpatterns = [
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('api/v1/',include('website.urls'))
 ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
+
+from . import consumers
+
+websocket_urlpatterns = [
+    path('ws/chat/<str:room_name>/', consumers.ChatRoomConsumer.as_asgi()),
+]

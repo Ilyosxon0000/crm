@@ -82,7 +82,7 @@ class Teacher(models.Model):
     address=models.CharField(max_length=400,blank=True,null=True)
     description=models.TextField(blank=True,null=True)
     experience=models.CharField(max_length=255,blank=True,null=True)
-    language_certificate=models.CharField(max_length=255,blank=True,null=True)
+    language_certificate=models.FileField(upload_to=f"uploads/teachers/{user}/l_sert/%Y_%m_%d",blank=True,null=True)
     lens=models.FileField(upload_to=f"uploads/teachers/{user}/lens/%Y_%m_%d",blank=True,null=True)
     id_card_photo=models.FileField(upload_to=f"uploads/teachers/{user}/id_card_photo/%Y_%m_%d",blank=True,null=True)
     survey=models.FileField(upload_to=f"uploads/teachers/{user}/survey/%Y_%m_%d",blank=True,null=True)
@@ -148,17 +148,6 @@ class Parent(models.Model):
 
     def __str__(self):
         return f"parent:{self.user.username}"
-    
-    def save(self, *args, **kwargs):
-        self.id=self.user.id
-        super().save(*args, **kwargs)
-# TODO
-class Menu(models.Model):
-    user=models.OneToOneField(User,related_name='menus',on_delete=models.CASCADE)
-    menus=models.TextField(blank=True,null=True)
-
-    def __str__(self):
-        return f"menus:{self.user.username}"
     
     def save(self, *args, **kwargs):
         self.id=self.user.id

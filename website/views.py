@@ -2,16 +2,17 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from .filters import DavomatFilter
-from .models import Type_of_Admin,Permission,Admin,\
-    Teacher,Employer,Student,Parent,Chat_room,Message,Davomat,Menu
+from .models import Science, Type_of_Admin,Permission,Admin,\
+    Teacher,Employer,Student,Parent,Chat_room,Message,Davomat
 from .serializers import AdminUpdateSerializer, EmployerUpdateSerializer, \
-    ParentUpdateSerializer, StudentUpdateSerializer, TeacherUpdateSerializer, \
+    ParentUpdateSerializer, Scince_Serializer, StudentUpdateSerializer, TeacherUpdateSerializer, \
     Type_of_Admin_Serializer,Permission_Serializer,AdminSerializer,\
     TeacherSerializer,EmployerSerializer,StudentSerializer,ParentSerializer,\
     ChatRoomSerializer,MessageSerializer,UserSerializer,DavomatSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework import status
 from django.contrib.auth.models import User
+from rest_framework.settings import api_settings
 
 
 class Users(APIView):
@@ -88,7 +89,6 @@ class Users(APIView):
     def post(self,request,*args,**kwargs):
         user=request.data["user"]
         user_type=request.data['type']
-        menus=request.data['menu']
         data=dict(request.data)['model']
         try:
             
@@ -99,29 +99,21 @@ class Users(APIView):
                     if data.get("permission"):
                         for i in data.get("permission"):
                             admin.permissions.add(Permission.objects.get(id=i))
-                    if menus:
-                        Menu.objects.create(user=myuser,menus=menus)
                     serializer=AdminSerializer(admin,many=False)
                     return Response({"teacher":serializer.data})
                 case 'teacher':
                     myuser=User.objects.create_user(username=user['username'],password=user['password'],first_name=user_type)
                     teacher=Teacher.objects.create(user=myuser,first_name=data['first_name'],last_name=data['last_name'],lavozim=data['lavozim'])
-                    if menus:
-                        Menu.objects.create(user=myuser,menus=menus)
                     serializer=TeacherSerializer(teacher,many=False)
                     return Response({"teacher":serializer.data})
                 case 'employer':
                     myuser=User.objects.create_user(username=user['username'],password=user['password'],first_name=user_type)
                     teacher=Employer.objects.create(user=myuser,first_name=data['first_name'],last_name=data['last_name'],lavozim=data['lavozim'])
-                    if menus:
-                        Menu.objects.create(user=myuser,menus=menus)
                     serializer=EmployerSerializer(teacher,many=False)
                     return Response({"employer":serializer.data})
                 case 'student':
                     myuser=User.objects.create_user(username=user['username'],password=user['password'],first_name=user_type)
                     student=Student.objects.create(user=myuser,first_name=data['first_name'],last_name=data['last_name'])
-                    if menus:
-                        Menu.objects.create(user=myuser,menus=menus)
                     serializer=StudentSerializer(student,many=False)
                     return Response({"student":serializer.data})
                 case 'parent':
@@ -130,8 +122,6 @@ class Users(APIView):
                     if data.get("children"):
                         for i in data.get("children"):
                             parent.children.add(Student.objects.get(id=i))
-                    if menus:
-                        Menu.objects.create(user=myuser,menus=menus)
                     serializer=ParentSerializer(parent,many=False)
                     return Response({"parent":serializer.data})
         except:
@@ -154,6 +144,15 @@ class AdminView(ModelViewSet):
     queryset=Admin.objects.all()
     serializer_class=AdminSerializer
 
+    def create(self, request, *args, **kwargs):
+        print("ishladi create")
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response({"data":serializer.data,"success":"true"}, status=status.HTTP_201_CREATED, headers=headers)
+
+
     def get_serializer_class(self):
         if self.action == 'update':
             return AdminUpdateSerializer
@@ -162,14 +161,23 @@ class AdminView(ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
-        return Response({"message":"success"},status=status.HTTP_204_NO_CONTENT)
+        return Response({"success":"true"},status=status.HTTP_200_OK)
 
-    def perform_destroy(self, instance):
-        instance.delete()
+class ScienceView(ModelViewSet):
+    queryset=Science.objects.all()
+    serializer_class=Scince_Serializer
+    filterset_fields=["id","title","slug"]
 
 class TeacherView(ModelViewSet):
     queryset=Teacher.objects.all()
     serializer_class=TeacherSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response({"data":serializer.data,"success":"true"}, status=status.HTTP_201_CREATED, headers=headers)
 
     def get_serializer_class(self):
         if self.action == 'update':
@@ -179,14 +187,18 @@ class TeacherView(ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
-        return Response({"message":"deleted"},status=status.HTTP_204_NO_CONTENT)
-
-    def perform_destroy(self, instance):
-        instance.delete()
+        return Response({"success":"true"},status=status.HTTP_200_OK)
 
 class EmployerView(ModelViewSet):
     queryset=Employer.objects.all()
     serializer_class=EmployerSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response({"data":serializer.data,"success":"true"}, status=status.HTTP_201_CREATED, headers=headers)
 
     def get_serializer_class(self):
         if self.action == 'update':
@@ -195,14 +207,18 @@ class EmployerView(ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
-        return Response({"message":"deleted"},status=status.HTTP_204_NO_CONTENT)
-
-    def perform_destroy(self, instance):
-        instance.delete()
+        return Response({"success":"true"},status=status.HTTP_200_OK)
 
 class StudentView(ModelViewSet):
     queryset=Student.objects.all()
     serializer_class=StudentSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response({"data":serializer.data,"success":"true"}, status=status.HTTP_201_CREATED, headers=headers)
 
     def get_serializer_class(self):
         if self.action == 'update':
@@ -212,14 +228,18 @@ class StudentView(ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
-        return Response({"message":"deleted"},status=status.HTTP_204_NO_CONTENT)
-
-    def perform_destroy(self, instance):
-        instance.delete()
+        return Response({"success":"true"},status=status.HTTP_200_OK)
 
 class ParentView(ModelViewSet):
     queryset=Parent.objects.all()
     serializer_class=ParentSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response({"data":serializer.data,"success":"true"}, status=status.HTTP_201_CREATED, headers=headers)
 
     def get_serializer_class(self):
         if self.action == 'update':
@@ -229,10 +249,7 @@ class ParentView(ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
-        return Response({"message":"deleted"},status=status.HTTP_204_NO_CONTENT)
-
-    def perform_destroy(self, instance):
-        instance.delete()
+        return Response({"success":"true"},status=status.HTTP_200_OK)
 
 class ChatRoomeView(ModelViewSet):
     queryset=Chat_room.objects.all()

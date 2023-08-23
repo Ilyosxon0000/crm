@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import TypeView,PermissionView,AdminView,TeacherView,\
+from .views import ScienceView, TypeView,PermissionView,AdminView,TeacherView,\
     EmployerView,StudentView,ParentView,ChatRoomeView,MessageView,Users,\
     DavomatView
 from rest_framework.schemas import get_schema_view
@@ -13,6 +13,7 @@ router=MyRouter()
 router.register('type-admin',TypeView,basename='type-admin')
 router.register('permission-admin',PermissionView,basename='permission')
 router.register('custom-admin',AdminView,basename='admin')
+router.register('science',ScienceView,basename='science')
 router.register('teacher',TeacherView,basename='teacher')
 router.register('employer',EmployerView,basename='employer')
 router.register('student',StudentView,basename='student')
