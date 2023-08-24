@@ -1,8 +1,8 @@
 import json
 from django.db import models
-from django.contrib.auth.models import User,AbstractUser,Group,Permission
+from django.contrib.auth.models import User
 from django.utils.text import slugify
-from django.conf import settings
+import datetime
 
 class Type_of_Admin(models.Model):
     title=models.CharField(max_length=255)
@@ -29,7 +29,12 @@ class Permission(models.Model):
         super().save(*args, **kwargs)
     
 class Admin(models.Model):
-    image=models.ImageField(upload_to="uploads/avatar/%Y_%m_%d",blank=True,null=True)
+    def admin_avatar_path(instance, filename):
+        current_date = datetime.datetime.now()
+        formatted_date = current_date.strftime("%Y_%m_%d")
+        return f"uploads/admins/{instance.user.username}/avatar/{formatted_date}/{filename}"
+    
+    image=models.ImageField(upload_to=admin_avatar_path,blank=True,null=True)
     user=models.OneToOneField(User,related_name='admins',on_delete=models.CASCADE)
     first_name=models.CharField(max_length=255)
     last_name=models.CharField(max_length=255)
@@ -54,48 +59,93 @@ class Science(models.Model):
         self.slug=slugify(self.title)
         super().save(*args, **kwargs)
 
+
 class Teacher(models.Model):
-    FIXED="FIXED"
-    PER_HOURS="PER_HOURS"
-    SALLERY_TYPE=(
-        (FIXED,"fixed"),
-        (PER_HOURS,"soatbay")
+    def teacher_avatar_path(instance, filename):
+        current_date = datetime.datetime.now()
+        formatted_date = current_date.strftime("%Y_%m_%d")
+        return f"uploads/teachers/{instance.user.username}/avatar/{formatted_date}/{filename}"
+
+    def teacher_language_certificate_path(instance, filename):
+        current_date = datetime.datetime.now()
+        formatted_date = current_date.strftime("%Y_%m_%d")
+        return f"uploads/teachers/{instance.user.username}/l_sert/{formatted_date}{filename}"
+
+    def teacher_lens_path(instance, filename):
+        current_date = datetime.datetime.now()
+        formatted_date = current_date.strftime("%Y_%m_%d")
+        return f"uploads/teachers/{instance.user.username}/lens/{formatted_date}/{filename}"
+
+    def teacher_id_card_photo_path(instance, filename):
+        current_date = datetime.datetime.now()
+        formatted_date = current_date.strftime("%Y_%m_%d")
+        return f"uploads/teachers/{instance.user.username}/id_card_photo/{formatted_date}/{filename}"
+
+    def teacher_survey_path(instance, filename):
+        current_date = datetime.datetime.now()
+        formatted_date = current_date.strftime("%Y_%m_%d")
+        return f"uploads/teachers/{instance.user.username}/survey/{formatted_date}/{filename}"
+
+    def teacher_biography_path(instance, filename):
+        current_date = datetime.datetime.now()
+        formatted_date = current_date.strftime("%Y_%m_%d")
+        return f"uploads/teachers/{instance.user.username}/biography/{formatted_date}/{filename}"
+
+    def teacher_medical_book_path(instance, filename):
+        current_date = datetime.datetime.now()
+        formatted_date = current_date.strftime("%Y_%m_%d")
+        return f"uploads/teachers/{instance.user.username}/medical_book/{formatted_date}/{filename}"
+
+    def teacher_picture_3x4_path(instance, filename):
+        current_date = datetime.datetime.now()
+        formatted_date = current_date.strftime("%Y_%m_%d")
+        return f"uploads/teachers/{instance.user.username}/picture_3x4/{formatted_date}/{filename}"
+
+    # rest of your model fields and methods...
+
+    FIXED = "FIXED"
+    PER_HOURS = "PER_HOURS"
+    SALLERY_TYPE = (
+        (FIXED, "fixed"),
+        (PER_HOURS, "soatbay")
     )
-    
-    MALE="MALE"
-    FEMALE="FEMALE"
-    GENDER=(
-        (MALE,"Erkak"),
-        (FEMALE,"Ayol")
+
+    MALE = "MALE"
+    FEMALE = "FEMALE"
+    GENDER = (
+        (MALE, "Erkak"),
+        (FEMALE, "Ayol")
     )
-    user=models.OneToOneField(User,related_name='teachers',on_delete=models.CASCADE)
-    image=models.ImageField(upload_to=f"uploads/teachers/{user}/avatar/%Y_%m_%d",blank=True,null=True)
-    science=models.ForeignKey(Science,related_name="teachers",on_delete=models.CASCADE)
-    first_name=models.CharField(max_length=255)
-    last_name=models.CharField(max_length=255)
-    middle_name=models.CharField(max_length=255)
-    id_card=models.CharField(max_length=50,blank=True,null=True)
-    sallery_type=models.CharField(max_length=255,choices=SALLERY_TYPE)
-    sallery=models.IntegerField(default=0)
-    date_of_employment=models.DateField(blank=True,null=True)
-    gender=models.CharField(max_length=255,choices=GENDER)
-    address=models.CharField(max_length=400,blank=True,null=True)
-    description=models.TextField(blank=True,null=True)
-    experience=models.CharField(max_length=255,blank=True,null=True)
-    language_certificate=models.FileField(upload_to=f"uploads/teachers/{user}/l_sert/%Y_%m_%d",blank=True,null=True)
-    lens=models.FileField(upload_to=f"uploads/teachers/{user}/lens/%Y_%m_%d",blank=True,null=True)
-    id_card_photo=models.FileField(upload_to=f"uploads/teachers/{user}/id_card_photo/%Y_%m_%d",blank=True,null=True)
-    survey=models.FileField(upload_to=f"uploads/teachers/{user}/survey/%Y_%m_%d",blank=True,null=True)
-    biography=models.FileField(upload_to=f"uploads/teachers/{user}/biography/%Y_%m_%d",blank=True,null=True)
-    medical_book=models.FileField(upload_to=f"uploads/teachers/{user}/biography/%Y_%m_%d",blank=True,null=True)
-    picture_3x4=models.FileField(upload_to=f"uploads/teachers/{user}/picture_3x4/%Y_%m_%d",null=True,blank=True)
+
+    user = models.OneToOneField(User, related_name='teachers', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to=teacher_avatar_path, blank=True, null=True)
+    science = models.ForeignKey(Science, related_name="teachers", on_delete=models.CASCADE)
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    middle_name = models.CharField(max_length=255)
+    id_card = models.CharField(max_length=50, blank=True, null=True)
+    sallery_type = models.CharField(max_length=255, choices=SALLERY_TYPE)
+    sallery = models.IntegerField(default=0)
+    date_of_employment = models.DateField(blank=True, null=True)
+    gender = models.CharField(max_length=255, choices=GENDER)
+    address = models.CharField(max_length=400, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    experience = models.CharField(max_length=255, blank=True, null=True)
+    language_certificate = models.FileField(upload_to=teacher_language_certificate_path, blank=True, null=True)
+    lens = models.FileField(upload_to=teacher_lens_path, blank=True, null=True)
+    id_card_photo = models.FileField(upload_to=teacher_id_card_photo_path, blank=True, null=True)
+    survey = models.FileField(upload_to=teacher_survey_path, blank=True, null=True)
+    biography = models.FileField(upload_to=teacher_biography_path, blank=True, null=True)
+    medical_book = models.FileField(upload_to=teacher_medical_book_path, blank=True, null=True)
+    picture_3x4 = models.FileField(upload_to=teacher_picture_3x4_path, null=True, blank=True)
 
     def __str__(self):
         return f"teacher:{self.user.username}"
     
     def save(self, *args, **kwargs):
-        self.id=self.user.id
+        self.id = self.user.id
         super().save(*args, **kwargs)
+
 
 class Sinf(models.Model):
     title=models.CharField(max_length=255)
@@ -106,7 +156,12 @@ class Sinf(models.Model):
         return f"teacher:{self.user.username}"
 
 class Employer(models.Model):
-    image=models.ImageField(upload_to="uploads/avatar/%Y_%m_%d",blank=True,null=True)
+    def employer_avatar_path(instance, filename):
+        current_date = datetime.datetime.now()
+        formatted_date = current_date.strftime("%Y_%m_%d")
+        return f"uploads/employers/{instance.user.username}/avatar/{formatted_date}/{filename}"
+    
+    image=models.ImageField(upload_to=employer_avatar_path,blank=True,null=True)
     user=models.OneToOneField(User,related_name='employers',on_delete=models.CASCADE)
     first_name=models.CharField(max_length=255)
     last_name=models.CharField(max_length=255)
@@ -120,27 +175,54 @@ class Employer(models.Model):
         super().save(*args, **kwargs)
 
 class Student(models.Model):
-    user=models.OneToOneField(User,related_name='students',on_delete=models.CASCADE)
-    image=models.ImageField(upload_to=f"uploads/students/{user}/avatar/%Y_%m_%d",blank=True,null=True)
-    first_name=models.CharField(max_length=255)
-    last_name=models.CharField(max_length=255)
-    middle_name=models.CharField(max_length=255)
-    id_card=models.CharField(max_length=50)
-    date_of_admission=models.DateField(blank=True,null=True)
-    class_of_school=models.ForeignKey(Sinf,related_name='students',on_delete=models.CASCADE,blank=True,null=True)
-    id_card_parents=models.FileField(upload_to=f"uploads/students/{user}/id_card_parents/%Y_%m_%d",null=True,blank=True)
-    picture_3x4=models.FileField(upload_to=f"uploads/students/{user}/picture_3x4/%Y_%m_%d",null=True,blank=True)
-    school_tab=models.FileField(upload_to=f"uploads/students/{user}/picture_3x4/%Y_%m_%d",null=True,blank=True)
+    def student_avatar_path(instance, filename):
+        current_date = datetime.datetime.now()
+        formatted_date = current_date.strftime("%Y_%m_%d")
+        return f"uploads/students/{instance.user.username}/avatar/{formatted_date}/{filename}"
+
+    def student_id_card_parents_path(instance, filename):
+        current_date = datetime.datetime.now()
+        formatted_date = current_date.strftime("%Y_%m_%d")
+        return f"uploads/students/{instance.user.username}/id_card_parents/{formatted_date}/{filename}"
+
+    def student_picture_3x4_path(instance, filename):
+        current_date = datetime.datetime.now()
+        formatted_date = current_date.strftime("%Y_%m_%d")
+        return f"uploads/students/{instance.user.username}/picture_3x4/{formatted_date}/{filename}"
+
+    def student_school_tab_path(instance, filename):
+        current_date = datetime.datetime.now()
+        formatted_date = current_date.strftime("%Y_%m_%d")
+        return f"uploads/students/{instance.user.username}/school_tab/{formatted_date}/{filename}"
+
+
+    user = models.OneToOneField(User, related_name='students', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to=student_avatar_path, blank=True, null=True)
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    middle_name = models.CharField(max_length=255)
+    id_card = models.CharField(max_length=50)
+    date_of_admission = models.DateField(blank=True, null=True)
+    class_of_school = models.ForeignKey(Sinf, related_name='students', on_delete=models.CASCADE, blank=True, null=True)
+    id_card_parents = models.FileField(upload_to=student_id_card_parents_path, null=True, blank=True)
+    picture_3x4 = models.FileField(upload_to=student_picture_3x4_path, null=True, blank=True)
+    school_tab = models.FileField(upload_to=student_school_tab_path, null=True, blank=True)
 
     def __str__(self):
         return f"student:{self.user.username}"
     
     def save(self, *args, **kwargs):
-        self.id=self.user.id
+        self.id = self.user.id
         super().save(*args, **kwargs)
+
     
 class Parent(models.Model):
-    image=models.ImageField(upload_to="uploads/avatar/%Y_%m_%d",blank=True,null=True)
+    def parent_avatar_path(instance, filename):
+        current_date = datetime.datetime.now()
+        formatted_date = current_date.strftime("%Y_%m_%d")
+        return f"uploads/parents/{instance.user.username}/avatar/{formatted_date}/{filename}"
+    
+    image=models.ImageField(upload_to=parent_avatar_path,blank=True,null=True)
     user=models.OneToOneField(User,related_name='parents',on_delete=models.CASCADE)
     first_name=models.CharField(max_length=255)
     last_name=models.CharField(max_length=255)
