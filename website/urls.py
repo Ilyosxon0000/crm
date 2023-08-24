@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import ScienceView, TypeView,PermissionView,AdminView,TeacherView,\
     EmployerView,StudentView,ParentView,ChatRoomeView,MessageView,Users,\
-    DavomatView
+    DavomatView,Student_PayView
 from rest_framework.schemas import get_schema_view
 from .router import MyRouter,Custom_List
 from .token import TokenCreateView
@@ -21,6 +21,7 @@ router.register('parent',ParentView,basename='parent')
 router.register('chat-room',ChatRoomeView,basename='chat-room')
 router.register('message',MessageView,basename='message')
 router.register('davomat',DavomatView,basename='davomat')
+router.register('student-pay',Student_PayView,basename='student-pay')
 
 
 urlpatterns = [

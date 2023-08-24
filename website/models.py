@@ -214,3 +214,17 @@ class Davomat(models.Model):
     class Meta:
         verbose_name_plural="Davomatlar"
 
+class Student_Pay(models.Model):
+    PAID="PAID"
+    NO_PAID="NO_PAID"#DID not paid
+    STATUS=(
+        (PAID,"to'lagan"),
+        (NO_PAID,"to'lamagan")
+    )
+    student=models.ForeignKey(Student,related_name='pays',on_delete=models.CASCADE)
+    status=models.CharField(max_length=255,choices=STATUS)
+    summa=models.IntegerField(default=0)
+    date=models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"username:{self.student.user.username};status:{self.status};summa:{self.summa};date:{self.date.month};"

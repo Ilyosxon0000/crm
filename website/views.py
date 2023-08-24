@@ -3,12 +3,14 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from .filters import DavomatFilter
 from .models import Science, Type_of_Admin,Permission,Admin,\
-    Teacher,Employer,Student,Parent,Chat_room,Message,Davomat
+    Teacher,Employer,Student,Parent,Chat_room,Message,Davomat,\
+    Student_Pay
 from .serializers import AdminUpdateSerializer, EmployerUpdateSerializer, \
     ParentUpdateSerializer, Scince_Serializer, StudentUpdateSerializer, TeacherUpdateSerializer, \
     Type_of_Admin_Serializer,Permission_Serializer,AdminSerializer,\
     TeacherSerializer,EmployerSerializer,StudentSerializer,ParentSerializer,\
-    ChatRoomSerializer,MessageSerializer,UserSerializer,DavomatSerializer
+    ChatRoomSerializer,MessageSerializer,UserSerializer,DavomatSerializer,\
+    Student_Pay_Serializer
 from rest_framework.permissions import AllowAny
 from rest_framework import status
 from django.contrib.auth.models import User
@@ -285,3 +287,8 @@ class DavomatView(ModelViewSet):
     #     serializer = self.get_serializer(queryset, many=True)
     #     return Response(serializer.data)  
     # filterset_fields=["user","davomat",'date']
+
+class Student_PayView(ModelViewSet):
+    queryset=Student_Pay.objects.all()
+    serializer_class=Student_Pay_Serializer
+    # filterset_fields=["id","title","slug"]

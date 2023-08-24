@@ -1,13 +1,13 @@
 from rest_framework import serializers
-from .models import Science, Type_of_Admin,Permission,Admin,Teacher,Employer,Student,Parent,Chat_room,Message,Davomat
+from .models import Science, Type_of_Admin,Permission,Admin,Teacher,Employer,Student,Parent,Chat_room,Message,Davomat,Student_Pay
 from django.contrib.auth.models import User
 
 def get_user(self, obj):
-        request = self.context.get('request')
-        serializer_context = {'request': request }
-        user = obj.user
-        serializer = UserSerializer(user, many=False, context=serializer_context)
-        return serializer.data
+    request = self.context.get('request')
+    serializer_context = {'request': request }
+    user = obj.user
+    serializer = UserSerializer(user, many=False, context=serializer_context)
+    return serializer.data
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -251,4 +251,16 @@ class DavomatSerializer(serializers.ModelSerializer):
     
     def get_user_dict(self, obj):
         return get_user(self=self,obj=obj)
+
+class Student_Pay_Serializer(serializers.ModelSerializer):
+    user_dict=serializers.SerializerMethodField('get_user_dict')
+    class Meta:
+        model=Student_Pay
+        fields="__all__"
     
+    def get_user_dict(self, obj):
+        request = self.context.get('request')
+        serializer_context = {'request': request }
+        user = obj.student.user
+        serializer = UserSerializer(user, many=False, context=serializer_context)
+        return serializer.data
