@@ -140,8 +140,9 @@ if DEPLOY=="False":
     ]
     MEDIA_ROOT=BASE_DIR / 'media'
 else:
-    MEDIA_ROOT = '/home/alcrm/core/media'
-    STATIC_ROOT = '/home/alcrm/core/static'
+    MEDIA_ROOT = '/home/alcrm/crm/media'
+    STATIC_ROOT = '/home/alcrm/crm/static'
+
 
 
 # Default primary key field type
