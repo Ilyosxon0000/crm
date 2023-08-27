@@ -170,6 +170,12 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3003",
     "http://localhost:3004",
     "http://localhost:3005",
+    "http://localhost:9001",
+    "http://localhost:9000",
+    "http://localhost:9002",
+    "http://localhost:9003",
+    "http://localhost:9004",
+    "http://localhost:9005",
     "http://localhost:5500",
 ]
 
