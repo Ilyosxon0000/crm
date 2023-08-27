@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import ScienceView, TypeView,PermissionView,AdminView,TeacherView,\
     EmployerView,StudentView,ParentView,ChatRoomeView,MessageView,Users,\
-    DavomatView,Student_PayView
+    DavomatView,Student_PayView,StudentxlsView
 from rest_framework.schemas import get_schema_view
 from .router import MyRouter,Custom_List
 from .token import TokenCreateView
@@ -32,4 +32,5 @@ urlpatterns = [
     ), name='openapi-schema'),
     path('users/',Users.as_view()),
     path('token/login/',TokenCreateView.as_view()),
+    # path('student/xls/',StudentxlsView.as_view()),
 ]+router.urls

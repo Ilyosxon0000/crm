@@ -131,6 +131,12 @@ class Users(APIView):
             return Response({"result":"nimadir xato ketdi!!!"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(request.data,status=200)
 
+class StudentxlsView(APIView):
+    permission_classes=[AllowAny]
+    def post(self,request,*args,**kwargs):
+
+        return Response(request.data,status=200)
+
 class TypeView(ModelViewSet):
     queryset=Type_of_Admin.objects.all()
     serializer_class=Type_of_Admin_Serializer
@@ -175,6 +181,7 @@ class TeacherView(ModelViewSet):
     serializer_class=TeacherSerializer
 
     def create(self, request, *args, **kwargs):
+        print("Function is working")
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)

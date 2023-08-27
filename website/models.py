@@ -12,7 +12,6 @@ class Type_of_Admin(models.Model):
         return self.title
     
     def save(self, *args, **kwargs):
-        # self.slug=self.title.lower().replace(" ","-")
         self.slug=slugify(self.title)
         super().save(*args, **kwargs)
     
@@ -24,7 +23,6 @@ class Permission(models.Model):
         return f"{self.title}"
     
     def save(self, *args, **kwargs):
-        # self.slug=self.title.lower().replace(" ","-")
         self.slug=slugify(self.title)
         super().save(*args, **kwargs)
     
@@ -100,8 +98,6 @@ class Teacher(models.Model):
         current_date = datetime.datetime.now()
         formatted_date = current_date.strftime("%Y_%m_%d")
         return f"uploads/teachers/{instance.user.username}/picture_3x4/{formatted_date}/{filename}"
-
-    # rest of your model fields and methods...
 
     FIXED = "FIXED"
     PER_HOURS = "PER_HOURS"
@@ -244,7 +240,6 @@ class Chat_room(models.Model):
         return self.name
     
     def save(self, *args, **kwargs):
-        # self.slug=self.title.lower().replace(" ","-")
         self.slug=slugify(self.name)
         super().save(*args, **kwargs)
     
