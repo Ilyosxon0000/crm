@@ -79,12 +79,16 @@ class AdminSerializer(serializers.ModelSerializer):
             return []
 
 class AdminUpdateSerializer(serializers.ModelSerializer):
+    user=serializers.SerializerMethodField('get_user_dict')
     type_dict=serializers.SerializerMethodField('get_type_dict')
     permissions_dict=serializers.SerializerMethodField('get_permissions_dict')
 
     class Meta:
         model=Admin
         fields="__all__"
+
+    def get_user_dict(self, obj):
+        return get_user(self=self,obj=obj)
 
     def get_type_dict(self, obj):
         request = self.context.get('request')
@@ -123,9 +127,13 @@ class TeacherSerializer(serializers.ModelSerializer):
         return document
     
 class TeacherUpdateSerializer(serializers.ModelSerializer):
+    user=serializers.SerializerMethodField('get_user_dict')
     class Meta:
         model=Teacher
         fields="__all__"
+    
+    def get_user_dict(self, obj):
+        return get_user(self=self,obj=obj)
 
 class EmployerSerializer(serializers.ModelSerializer):
     user=SecondUserSerializer()
@@ -143,9 +151,13 @@ class EmployerSerializer(serializers.ModelSerializer):
         return document
     
 class EmployerUpdateSerializer(serializers.ModelSerializer):
+    user=serializers.SerializerMethodField('get_user_dict')
     class Meta:
         model=Employer
         fields="__all__"
+
+    def get_user_dict(self, obj):
+        return get_user(self=self,obj=obj)
     
 class StudentSerializer(serializers.ModelSerializer):
     user=SecondUserSerializer()
@@ -163,10 +175,13 @@ class StudentSerializer(serializers.ModelSerializer):
         return document
     
 class StudentUpdateSerializer(serializers.ModelSerializer):
+    user=serializers.SerializerMethodField('get_user_dict')
     class Meta:
         model=Student
         fields="__all__"
-    
+    def get_user_dict(self, obj):
+        return get_user(self=self,obj=obj)
+
 class ParentSerializer(serializers.ModelSerializer):
     user=SecondUserSerializer()
     children_dict=serializers.SerializerMethodField('get_children_dict')
@@ -196,11 +211,14 @@ class ParentSerializer(serializers.ModelSerializer):
         return serializer.data
     
 class ParentUpdateSerializer(serializers.ModelSerializer):
+    user=serializers.SerializerMethodField('get_user_dict')
     children_dict=serializers.SerializerMethodField('get_children_dict')
 
     class Meta:
         model=Parent
         fields="__all__"
+    def get_user_dict(self, obj):
+        return get_user(self=self,obj=obj)
 
     def get_children_dict(self, obj):
         request = self.context.get('request')
