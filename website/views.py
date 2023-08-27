@@ -153,7 +153,6 @@ class AdminView(ModelViewSet):
     serializer_class=AdminSerializer
 
     def create(self, request, *args, **kwargs):
-        print("ishladi create")
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -168,7 +167,10 @@ class AdminView(ModelViewSet):
     
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
+        user_id=instance.id
+        user=User.objects.get(id=user_id)
         self.perform_destroy(instance)
+        user.delete()
         return Response({"success":"true"},status=status.HTTP_200_OK)
 
 class ScienceView(ModelViewSet):
@@ -215,7 +217,10 @@ class EmployerView(ModelViewSet):
         return EmployerSerializer
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
+        user_id=instance.id
+        user=User.objects.get(id=user_id)
         self.perform_destroy(instance)
+        user.delete()
         return Response({"success":"true"},status=status.HTTP_200_OK)
 
 class StudentView(ModelViewSet):
@@ -236,7 +241,10 @@ class StudentView(ModelViewSet):
     
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
+        user_id=instance.id
+        user=User.objects.get(id=user_id)
         self.perform_destroy(instance)
+        user.delete()
         return Response({"success":"true"},status=status.HTTP_200_OK)
 
 class ParentView(ModelViewSet):
@@ -257,7 +265,10 @@ class ParentView(ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
+        user_id=instance.id
+        user=User.objects.get(id=user_id)
         self.perform_destroy(instance)
+        user.delete()
         return Response({"success":"true"},status=status.HTTP_200_OK)
 
 class ChatRoomeView(ModelViewSet):
