@@ -14,8 +14,8 @@ from .serializers import AdminUpdateSerializer, EmployerUpdateSerializer, \
 from rest_framework.permissions import AllowAny
 from rest_framework import status
 from django.contrib.auth.models import User
-from rest_framework.settings import api_settings
-
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 
 class Users(APIView):
     serializer_class=UserSerializer
@@ -145,7 +145,10 @@ class TypeView(ModelViewSet):
 class PermissionView(ModelViewSet):
     queryset=Permission.objects.all()
     serializer_class=Permission_Serializer
-    
+
+@receiver(post_delete, sender=Admin)
+def delete_user(sender, instance, **kwargs):
+    instance.user.delete()
 
 class AdminView(ModelViewSet):
     permission_classes=[AllowAny]
@@ -159,7 +162,6 @@ class AdminView(ModelViewSet):
         headers = self.get_success_headers(serializer.data)
         return Response({"data":serializer.data,"success":"true"}, status=status.HTTP_201_CREATED, headers=headers)
 
-
     def get_serializer_class(self):
         if self.action == 'update':
             return AdminUpdateSerializer
@@ -167,11 +169,21 @@ class AdminView(ModelViewSet):
     
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        user_id=instance.id
-        user=User.objects.get(id=user_id)
         self.perform_destroy(instance)
-        user.delete()
         return Response({"success":"true"},status=status.HTTP_200_OK)
+    
+    def list(self, request, *args, **kwargs):
+        # Handling GET requests with query parameters
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        # Extract query parameters
+        username = self.request.GET.get('username')
+
+        if username:
+            queryset = queryset.filter(user__username=username)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data,status=status.HTTP_200_OK)
 
 class ScienceView(ModelViewSet):
     queryset=Science.objects.all()
@@ -183,7 +195,6 @@ class TeacherView(ModelViewSet):
     serializer_class=TeacherSerializer
 
     def create(self, request, *args, **kwargs):
-        print("Function is working")
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
@@ -217,10 +228,7 @@ class EmployerView(ModelViewSet):
         return EmployerSerializer
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        user_id=instance.id
-        user=User.objects.get(id=user_id)
         self.perform_destroy(instance)
-        user.delete()
         return Response({"success":"true"},status=status.HTTP_200_OK)
 
 class StudentView(ModelViewSet):
@@ -241,10 +249,7 @@ class StudentView(ModelViewSet):
     
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        user_id=instance.id
-        user=User.objects.get(id=user_id)
         self.perform_destroy(instance)
-        user.delete()
         return Response({"success":"true"},status=status.HTTP_200_OK)
 
 class ParentView(ModelViewSet):
@@ -265,10 +270,7 @@ class ParentView(ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        user_id=instance.id
-        user=User.objects.get(id=user_id)
         self.perform_destroy(instance)
-        user.delete()
         return Response({"success":"true"},status=status.HTTP_200_OK)
 
 class ChatRoomeView(ModelViewSet):
@@ -310,3 +312,4 @@ class Student_PayView(ModelViewSet):
     queryset=Student_Pay.objects.all()
     serializer_class=Student_Pay_Serializer
     # filterset_fields=["id","title","slug"]
+# ["tasischi","manager","finance","admin","teacher","employer","student","parent"]
