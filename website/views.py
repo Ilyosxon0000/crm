@@ -282,31 +282,37 @@ class MessageView(ModelViewSet):
     serializer_class=MessageSerializer
     filterset_fields=["chat_room","from_user","to_user","message",'date']
 
+from django.db.models import Q
+
 class DavomatView(ModelViewSet):
-    queryset=Davomat.objects.all()
-    serializer_class=DavomatSerializer
-    
-    filterset_class=DavomatFilter
+    queryset = Davomat.objects.all()
+    serializer_class = DavomatSerializer
+    filterset_class = DavomatFilter
 
     def get_queryset(self):
-        if self.request.GET.get('type'):
-            type_user=self.request.GET.get('type')
-            data=self.queryset.filter(user__first_name=type_user)
-            return data
-        return self.queryset
-        
-    # def list(self, request, *args, **kwargs):
-    #     print(request.method)
-    #     queryset = self.filter_queryset(self.get_queryset())
+        queryset = self.queryset
+        type_user = self.request.GET.get('type')
+        type_list = ["tasischi", "manager", "finance", "admin", "employer"]
 
-    #     page = self.paginate_queryset(queryset)
-    #     if page is not None:
-    #         serializer = self.get_serializer(page, many=True)
-    #         return self.get_paginated_response(serializer.data)
+        if type_user and type_user in type_list:
+            # Create a list of Q objects
+            q_objects = [Q(user__first_name=i) for i in type_list]
+            # Combine the Q objects using the OR operator
+            combined_q_object = q_objects.pop()
+            for q_obj in q_objects:
+                combined_q_object |= q_obj
+            # Apply the combined Q object to the queryset
+            queryset = queryset.filter(combined_q_object)
+        elif type_user:
+            queryset = queryset.filter(user__first_name=type_user)
+        return queryset
+    
+    def update(self, request, *args, **kwargs):
+        return Response({"message":"Ushbu amal bloklangan!"},status=status.HTTP_400_BAD_REQUEST)
+    
+    def destroy(self, request, *args, **kwargs):
+        return Response({"message":"Ushbu amal bloklangan!"},status=status.HTTP_400_BAD_REQUEST)
 
-    #     serializer = self.get_serializer(queryset, many=True)
-    #     return Response(serializer.data)  
-    # filterset_fields=["user","davomat",'date']
 
 class Student_PayView(ModelViewSet):
     queryset=Student_Pay.objects.all()

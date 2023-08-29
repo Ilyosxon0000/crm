@@ -33,7 +33,7 @@ class Admin(models.Model):
         return f"uploads/admins/{instance.user.username}/avatar/{formatted_date}/{filename}"
     
     image=models.ImageField(upload_to=admin_avatar_path,blank=True,null=True)
-    user=models.OneToOneField(User,related_name='admins',on_delete=models.CASCADE)
+    user=models.OneToOneField(User,related_name='admin',on_delete=models.CASCADE)
     first_name=models.CharField(max_length=255)
     last_name=models.CharField(max_length=255)
     types=models.ForeignKey(Type_of_Admin,related_name='admins',on_delete=models.CASCADE)
@@ -113,7 +113,7 @@ class Teacher(models.Model):
         (FEMALE, "Ayol")
     )
 
-    user = models.OneToOneField(User, related_name='teachers', on_delete=models.CASCADE)
+    user = models.OneToOneField(User, related_name='teacher', on_delete=models.CASCADE)
     image = models.ImageField(upload_to=teacher_avatar_path, blank=True, null=True)
     science = models.ForeignKey(Science, related_name="teachers", on_delete=models.CASCADE)
     first_name = models.CharField(max_length=255)
@@ -158,7 +158,7 @@ class Employer(models.Model):
         return f"uploads/employers/{instance.user.username}/avatar/{formatted_date}/{filename}"
     
     image=models.ImageField(upload_to=employer_avatar_path,blank=True,null=True)
-    user=models.OneToOneField(User,related_name='employers',on_delete=models.CASCADE)
+    user=models.OneToOneField(User,related_name='employer',on_delete=models.CASCADE)
     first_name=models.CharField(max_length=255)
     last_name=models.CharField(max_length=255)
     lavozim=models.CharField(max_length=255)
@@ -192,7 +192,7 @@ class Student(models.Model):
         return f"uploads/students/{instance.user.username}/school_tab/{formatted_date}/{filename}"
 
 
-    user = models.OneToOneField(User, related_name='students', on_delete=models.CASCADE)
+    user = models.OneToOneField(User, related_name='student', on_delete=models.CASCADE)
     image = models.ImageField(upload_to=student_avatar_path, blank=True, null=True)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
@@ -219,7 +219,7 @@ class Parent(models.Model):
         return f"uploads/parents/{instance.user.username}/avatar/{formatted_date}/{filename}"
     
     image=models.ImageField(upload_to=parent_avatar_path,blank=True,null=True)
-    user=models.OneToOneField(User,related_name='parents',on_delete=models.CASCADE)
+    user=models.OneToOneField(User,related_name='parent',on_delete=models.CASCADE)
     first_name=models.CharField(max_length=255)
     last_name=models.CharField(max_length=255)
     children=models.ManyToManyField(Student,related_name="parents",blank=True)

@@ -147,7 +147,7 @@ class EmployerSerializer(serializers.ModelSerializer):
         user.set_password(user_profile_data['password'])
         user.first_name="employer"
         user.save()
-        document = Student.objects.create(user=user, **validated_data)
+        document = Employer.objects.create(user=user, **validated_data)
         return document
     
 class EmployerUpdateSerializer(serializers.ModelSerializer):
@@ -268,7 +268,21 @@ class DavomatSerializer(serializers.ModelSerializer):
         fields=("id","user","user_dict","davomat","date")
     
     def get_user_dict(self, obj):
-        return get_user(self=self,obj=obj)
+        request = self.context.get('request')
+        serializer_context = {'request': request }
+        user = obj.user
+        if user.first_name=="employer":
+            serializer=EmployerSerializer(user.employer,many=False, context=serializer_context)
+        elif user.first_name=="teacher":
+            serializer=EmployerSerializer(user.teacher,many=False, context=serializer_context)
+        elif user.first_name=="student":
+            serializer=EmployerSerializer(user.student,many=False, context=serializer_context)
+        elif user.first_name=="parent":
+            serializer=EmployerSerializer(user.parent,many=False, context=serializer_context)
+        else:
+            serializer=AdminSerializer(user.admin,many=False, context=serializer_context)
+        # serializer = UserSerializer(user, many=False, context=serializer_context)
+        return serializer.data
 
 class Student_Pay_Serializer(serializers.ModelSerializer):
     user_dict=serializers.SerializerMethodField('get_user_dict')
