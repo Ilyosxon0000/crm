@@ -162,7 +162,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ),
 }
-
+CORS_ALLOW_ALL_ORIGINS=True
 # CORS_ALLOWED_ORIGINS = [
 #     "http://localhost:3000",
 #     "http://localhost:3001",
@@ -178,8 +178,6 @@ REST_FRAMEWORK = {
 #     "http://localhost:9005",
 #     "http://localhost:5500",
 # ]
-
-CORS_ALLOW_ALL_ORIGINS=True
 
 CHANNEL_LAYERS = {
     "default": {

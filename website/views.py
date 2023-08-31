@@ -16,6 +16,7 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
 
 class Users(APIView):
     serializer_class=UserSerializer

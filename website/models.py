@@ -278,6 +278,7 @@ class Davomat(models.Model):
     )
     davomat=models.CharField(choices=CHOICES_DAVOMAT,max_length=50)
     date=models.DateField(auto_now_add=True)
+    sabab=models.TextField(blank=True,null=True)
 
     def get_date(self):
         return self.date.strftime('%d.%m.%Y %H:%M')
