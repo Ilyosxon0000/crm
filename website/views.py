@@ -215,6 +215,7 @@ class TeacherView(ModelViewSet):
                     del_key.append(key)
         for item in del_key:
             my_dict.pop(item)
+        # Bu Comment
         serializer = self.get_serializer(instance, data=my_dict, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
