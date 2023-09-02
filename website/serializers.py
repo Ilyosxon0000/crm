@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Science, Type_of_Admin,Permission,Admin,Teacher,Employer,Student,Parent,Chat_room,Message,Davomat,Student_Pay
+from .models import Expense, Science, Type_of_Admin,Permission,Admin,Teacher,Employer,Student,Parent,Chat_room,Message,Davomat,Student_Pay
 from django.contrib.auth.models import User
 
 def get_user(self, obj):
@@ -117,6 +117,7 @@ class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
         model=Teacher
         fields="__all__"
+        
     def create(self, validated_data):
         user_profile_data = validated_data.pop('user')
         user = User.objects.create_user(**user_profile_data)
@@ -296,3 +297,8 @@ class Student_Pay_Serializer(serializers.ModelSerializer):
         user = obj.student.user
         serializer = UserSerializer(user, many=False, context=serializer_context)
         return serializer.data
+    
+class Expense_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model=Expense
+        fields="__all__"

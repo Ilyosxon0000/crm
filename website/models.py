@@ -31,7 +31,7 @@ class Admin(models.Model):
         current_date = datetime.datetime.now()
         formatted_date = current_date.strftime("%Y_%m_%d")
         return f"uploads/admins/{instance.user.username}/avatar/{formatted_date}/{filename}"
-    
+    salary = models.IntegerField(default=0)
     image=models.ImageField(upload_to=admin_avatar_path,blank=True,null=True)
     user=models.OneToOneField(User,related_name='admin',on_delete=models.CASCADE)
     first_name=models.CharField(max_length=255)
@@ -101,7 +101,7 @@ class Teacher(models.Model):
 
     FIXED = "FIXED"
     PER_HOURS = "PER_HOURS"
-    SALLERY_TYPE = (
+    SALARY_TYPE = (
         (FIXED, "fixed"),
         (PER_HOURS, "soatbay")
     )
@@ -112,6 +112,7 @@ class Teacher(models.Model):
         (MALE, "Erkak"),
         (FEMALE, "Ayol")
     )
+    # http://127.0.0.1:8000/media/uploads/teachers/first_teacher5/avatar/2023_09_01/Screenshot_from_2023-08-27_16-20-03_gYEAqW1.png
 
     user = models.OneToOneField(User, related_name='teacher', on_delete=models.CASCADE)
     image = models.ImageField(upload_to=teacher_avatar_path, blank=True, null=True)
@@ -120,8 +121,8 @@ class Teacher(models.Model):
     last_name = models.CharField(max_length=255)
     middle_name = models.CharField(max_length=255)
     id_card = models.CharField(max_length=50, blank=True, null=True)
-    sallery_type = models.CharField(max_length=255, choices=SALLERY_TYPE)
-    sallery = models.IntegerField(default=0)
+    salary_type = models.CharField(max_length=255, choices=SALARY_TYPE)
+    salary = models.IntegerField(default=0)
     date_of_employment = models.DateField(blank=True, null=True)
     gender = models.CharField(max_length=255, choices=GENDER)
     address = models.CharField(max_length=400, blank=True, null=True)
@@ -156,7 +157,7 @@ class Employer(models.Model):
         current_date = datetime.datetime.now()
         formatted_date = current_date.strftime("%Y_%m_%d")
         return f"uploads/employers/{instance.user.username}/avatar/{formatted_date}/{filename}"
-    
+    salary = models.IntegerField(default=0)    
     image=models.ImageField(upload_to=employer_avatar_path,blank=True,null=True)
     user=models.OneToOneField(User,related_name='employer',on_delete=models.CASCADE)
     first_name=models.CharField(max_length=255)
@@ -306,3 +307,14 @@ class Student_Pay(models.Model):
 
     def __str__(self):
         return f"username:{self.student.user.username};status:{self.status};summa:{self.summa};date:{self.date.month};"
+
+class Expense(models.Model):
+    amount=models.IntegerField(default=0)
+    comment=models.TextField(blank=True,null=True)
+    date=models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.amount}.Chiqim sababi:{self.comment}"
+    
+    
+

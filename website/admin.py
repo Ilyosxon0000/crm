@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Type_of_Admin,Permission,Admin,Teacher,Student,Parent,Chat_room,Message,Davomat,Science
+from .models import Type_of_Admin,Permission,Admin,Teacher,Student\
+    ,Parent,Chat_room,Message,Davomat,Science,Student_Pay
 
 class List_Displey_Admin(admin.ModelAdmin):
     list_display=("id","user_id","user",)
@@ -14,3 +15,4 @@ admin.site.register(Chat_room)
 admin.site.register(Message)
 admin.site.register(Davomat)
 admin.site.register(Science)
+admin.site.register(Student_Pay)

@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from .filters import DavomatFilter
-from .models import Science, Type_of_Admin,Permission,Admin,\
+from .models import Expense, Science, Type_of_Admin,Permission,Admin,\
     Teacher,Employer,Student,Parent,Chat_room,Message,Davomat,\
     Student_Pay
 from .serializers import AdminUpdateSerializer, EmployerUpdateSerializer, \
@@ -10,7 +10,7 @@ from .serializers import AdminUpdateSerializer, EmployerUpdateSerializer, \
     Type_of_Admin_Serializer,Permission_Serializer,AdminSerializer,\
     TeacherSerializer,EmployerSerializer,StudentSerializer,ParentSerializer,\
     ChatRoomSerializer,MessageSerializer,UserSerializer,DavomatSerializer,\
-    Student_Pay_Serializer
+    Student_Pay_Serializer,Expense_Serializer
 from rest_framework.permissions import AllowAny
 from rest_framework import status
 from django.contrib.auth.models import User
@@ -156,13 +156,6 @@ class AdminView(ModelViewSet):
     queryset=Admin.objects.all()
     serializer_class=AdminSerializer
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response({"data":serializer.data,"success":"true"}, status=status.HTTP_201_CREATED, headers=headers)
-
     def get_serializer_class(self):
         if self.action == 'update':
             return AdminUpdateSerializer
@@ -194,6 +187,42 @@ class ScienceView(ModelViewSet):
 class TeacherView(ModelViewSet):
     queryset=Teacher.objects.all()
     serializer_class=TeacherSerializer
+
+    def update(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        data=request.data
+
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+
+        if data.get('user.username',False):
+            queryset = queryset.filter(user__username=data['user.username'])
+            if len(queryset)!=True:
+                instance.user.username=data['user.username']
+                instance.user.save()
+        
+        file_field=[
+            'image','language_certificate','lens','id_card_photo',
+            'survey','biography','medical_book','picture_3x4',"my_image"
+        ]
+        del_key=[]
+
+        my_dict=data.dict()
+        
+        for key in my_dict.keys():
+            if key in file_field:
+                if type(data[key])==str:
+                    del_key.append(key)
+        for item in del_key:
+            my_dict.pop(item)
+        serializer = self.get_serializer(instance, data=my_dict, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -318,5 +347,9 @@ class DavomatView(ModelViewSet):
 class Student_PayView(ModelViewSet):
     queryset=Student_Pay.objects.all()
     serializer_class=Student_Pay_Serializer
+
+class ExpenseView(ModelViewSet):
+    queryset=Expense.objects.all()
+    serializer_class=Expense_Serializer
     # filterset_fields=["id","title","slug"]
-# ["tasischi","manager","finance","admin","teacher","employer","student","parent"]
+    # ["tasischi","manager","finance","admin","teacher","employer","student","parent"]
