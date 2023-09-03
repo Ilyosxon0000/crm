@@ -1,6 +1,6 @@
 import json
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.utils.text import slugify
 import datetime
 
@@ -33,7 +33,7 @@ class Admin(models.Model):
         return f"uploads/admins/{instance.user.username}/avatar/{formatted_date}/{filename}"
     salary = models.IntegerField(default=0)
     image=models.ImageField(upload_to=admin_avatar_path,blank=True,null=True)
-    user=models.OneToOneField(User,related_name='admin',on_delete=models.CASCADE)
+    user=models.OneToOneField(get_user_model(),related_name='admin',on_delete=models.CASCADE)
     first_name=models.CharField(max_length=255)
     last_name=models.CharField(max_length=255)
     types=models.ForeignKey(Type_of_Admin,related_name='admins',on_delete=models.CASCADE)
@@ -112,9 +112,7 @@ class Teacher(models.Model):
         (MALE, "Erkak"),
         (FEMALE, "Ayol")
     )
-    # http://127.0.0.1:8000/media/uploads/teachers/first_teacher5/avatar/2023_09_01/Screenshot_from_2023-08-27_16-20-03_gYEAqW1.png
-
-    user = models.OneToOneField(User, related_name='teacher', on_delete=models.CASCADE)
+    user = models.OneToOneField(get_user_model(), related_name='teacher', on_delete=models.CASCADE)
     image = models.ImageField(upload_to=teacher_avatar_path, blank=True, null=True)
     science = models.ForeignKey(Science, related_name="teachers", on_delete=models.CASCADE)
     first_name = models.CharField(max_length=255)
@@ -159,7 +157,7 @@ class Employer(models.Model):
         return f"uploads/employers/{instance.user.username}/avatar/{formatted_date}/{filename}"
     salary = models.IntegerField(default=0)    
     image=models.ImageField(upload_to=employer_avatar_path,blank=True,null=True)
-    user=models.OneToOneField(User,related_name='employer',on_delete=models.CASCADE)
+    user=models.OneToOneField(get_user_model(),related_name='employer',on_delete=models.CASCADE)
     first_name=models.CharField(max_length=255)
     last_name=models.CharField(max_length=255)
     lavozim=models.CharField(max_length=255)
@@ -193,7 +191,7 @@ class Student(models.Model):
         return f"uploads/students/{instance.user.username}/school_tab/{formatted_date}/{filename}"
 
 
-    user = models.OneToOneField(User, related_name='student', on_delete=models.CASCADE)
+    user = models.OneToOneField(get_user_model(), related_name='student', on_delete=models.CASCADE)
     image = models.ImageField(upload_to=student_avatar_path, blank=True, null=True)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
@@ -220,7 +218,7 @@ class Parent(models.Model):
         return f"uploads/parents/{instance.user.username}/avatar/{formatted_date}/{filename}"
     
     image=models.ImageField(upload_to=parent_avatar_path,blank=True,null=True)
-    user=models.OneToOneField(User,related_name='parent',on_delete=models.CASCADE)
+    user=models.OneToOneField(get_user_model(),related_name='parent',on_delete=models.CASCADE)
     first_name=models.CharField(max_length=255)
     last_name=models.CharField(max_length=255)
     children=models.ManyToManyField(Student,related_name="parents",blank=True)
@@ -234,7 +232,7 @@ class Parent(models.Model):
 
 class Chat_room(models.Model):
     name=models.CharField(max_length=255,unique=True)
-    users=models.ManyToManyField(User,related_name='chat_rooms',blank=True)
+    users=models.ManyToManyField(get_user_model(),related_name='chat_rooms',blank=True)
     slug=models.SlugField(blank=True,null=True)
 
     def __str__(self):
@@ -246,8 +244,8 @@ class Chat_room(models.Model):
     
 class Message(models.Model):
     chat_room=models.ForeignKey(Chat_room,related_name='messages',on_delete=models.CASCADE)
-    from_user=models.ForeignKey(User,related_name='from_messages',on_delete=models.CASCADE)
-    to_user=models.ForeignKey(User,related_name='to_messages',on_delete=models.CASCADE)
+    from_user=models.ForeignKey(get_user_model(),related_name='from_messages',on_delete=models.CASCADE)
+    to_user=models.ForeignKey(get_user_model(),related_name='to_messages',on_delete=models.CASCADE)
     message=models.TextField(blank=True,null=True)
     file_message=models.FileField(upload_to="uploads/message/%Y_%m_%d",blank=True,null=True)
     date=models.DateTimeField(auto_now_add=True)
@@ -268,7 +266,7 @@ class Message(models.Model):
             return 'word_message'
     
 class Davomat(models.Model):
-    user=models.ForeignKey(User,related_name='davomatlar',on_delete=models.CASCADE)
+    user=models.ForeignKey(get_user_model(),related_name='davomatlar',on_delete=models.CASCADE)
     SABABLI="SABABLI"
     SABABSIZ="SABABSIZ"
     KELGAN="KELGAN"
@@ -309,12 +307,58 @@ class Student_Pay(models.Model):
         return f"username:{self.student.user.username};status:{self.status};summa:{self.summa};date:{self.date.month};"
 
 class Expense(models.Model):
+    GENERAL="GENERAL"
+    YEARLY="YEARLY"
+    MONTHLY="MONTHLY"
+    WEEKLY="WEEKLY"
+    DAILY="DAILY"
+    SALARY="SALARY"
+    OTHER="OTHER"
+    STATUS=(
+        (GENERAL,"umumiy"),
+        (YEARLY,"yillik"),
+        (MONTHLY,"oylik"),
+        (WEEKLY,"haftalik"),
+        (DAILY,"kunlik"),
+        (SALARY,"oylik maosh"),
+        (OTHER,"boshqa"),
+    )
     amount=models.IntegerField(default=0)
+    types=models.CharField(max_length=60,choices=STATUS,blank=True,null=True)
     comment=models.TextField(blank=True,null=True)
     date=models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.amount}.Chiqim sababi:{self.comment}"
+        return f"{self.types}:{self.amount}."
     
+    def get_date(self,types):
+        if types=="year":
+            return self.date.year
+        elif types=="month":
+            return self.date.month
+        elif types=="week":
+            return self.date.isocalendar()[1]
+        elif types=="day":
+            return self.date.day
     
+class InCome(models.Model):
+    GENERAL="GENERAL"
+    YEARLY="YEARLY"
+    MONTHLY="MONTHLY"
+    WEEKLY="WEEKLY"
+    DAILY="DAILY"
+    STATUS=(
+        (GENERAL,"umumiy"),
+        (YEARLY,"yillik"),
+        (MONTHLY,"oylik"),
+        (WEEKLY,"haftalik"),
+        (DAILY,"kunlik"),
+    )
+    amount=models.IntegerField(default=0)
+    types=models.CharField(max_length=60,choices=STATUS)
+    comment=models.TextField(blank=True,null=True)
+    date=models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.types}:{self.amount}."
 

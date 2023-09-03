@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from .models import Expense, Science, Type_of_Admin,Permission,Admin,Teacher,Employer,Student,Parent,Chat_room,Message,Davomat,Student_Pay
-from django.contrib.auth.models import User
+from .models import Expense, InCome, Science, Type_of_Admin,Permission,Admin,Teacher,Employer,Student,Parent,Chat_room,Message,Davomat,Student_Pay
+from django.contrib.auth import get_user_model
 
 def get_user(self, obj):
     request = self.context.get('request')
@@ -11,19 +11,19 @@ def get_user(self, obj):
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model=User
+        model=get_user_model()
         fields=("id","username","email","first_name")
         
 class SecondUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(required=False, style={"input_type": "password"},write_only=True)
     class Meta:
-        model = User
+        model = get_user_model()
         fields = ('id', 'username', 'password')
         extra_kwargs = {'password': {'write_only': True},'first_name': {'write_only': True}}
 
     def create(self, validated_data):
         password = validated_data.pop('password')
-        user = User.objects.create_user(**validated_data)
+        user = get_user_model().objects.create_user(**validated_data)
         user.set_password(password)
         user.save()
         return user
@@ -51,7 +51,7 @@ class AdminSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         permissions = validated_data.pop('permissions', None)
         user_profile_data = validated_data.pop('user')
-        user = User.objects.create_user(**user_profile_data)
+        user = get_user_model().objects.create_user(**user_profile_data)
         user.set_password(user_profile_data['password'])
         user.save()
         document = Admin.objects.create(user=user, **validated_data)
@@ -120,7 +120,7 @@ class TeacherSerializer(serializers.ModelSerializer):
         
     def create(self, validated_data):
         user_profile_data = validated_data.pop('user')
-        user = User.objects.create_user(**user_profile_data)
+        user = get_user_model().objects.create_user(**user_profile_data)
         user.set_password(user_profile_data['password'])
         user.first_name="teacher"
         user.save()
@@ -144,7 +144,7 @@ class EmployerSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user_profile_data = validated_data.pop('user')
-        user = User.objects.create_user(**user_profile_data)
+        user = get_user_model().objects.create_user(**user_profile_data)
         user.set_password(user_profile_data['password'])
         user.first_name="employer"
         user.save()
@@ -168,7 +168,7 @@ class StudentSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         user_profile_data = validated_data.pop('user')
-        user = User.objects.create_user(**user_profile_data)
+        user = get_user_model().objects.create_user(**user_profile_data)
         user.set_password(user_profile_data['password'])
         user.first_name="student"
         user.save()
@@ -195,7 +195,7 @@ class ParentSerializer(serializers.ModelSerializer):
         children = validated_data.pop('children', None)
         print(children)
         user_profile_data = validated_data.pop('user')
-        user = User.objects.create_user(**user_profile_data)
+        user = get_user_model().objects.create_user(**user_profile_data)
         user.set_password(user_profile_data['password'])
         user.first_name="parent"
         user.save()
@@ -264,9 +264,10 @@ class MessageSerializer(serializers.ModelSerializer):
     
 class DavomatSerializer(serializers.ModelSerializer):
     user_dict=serializers.SerializerMethodField('get_user_dict')
+    types=serializers.CharField(source="user.first_name")
     class Meta:
         model=Davomat
-        fields=("id","user","user_dict","davomat","sabab","date")
+        fields=("id","user",'types',"user_dict","davomat","sabab","date")
     
     def get_user_dict(self, obj):
         request = self.context.get('request')
@@ -301,4 +302,9 @@ class Student_Pay_Serializer(serializers.ModelSerializer):
 class Expense_Serializer(serializers.ModelSerializer):
     class Meta:
         model=Expense
+        fields="__all__"
+
+class InCome_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model=InCome
         fields="__all__"

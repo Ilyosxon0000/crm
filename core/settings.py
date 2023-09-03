@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django_filters',
     'djoser',
     'channels',
+    'django_crontab',
     # locale apps
     'website'
 ]
@@ -189,6 +190,11 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+# CRONJOBS = [
+#     ('0 0 1 * *', 'your_app_name.tasks.add_object_to_model_monthly'),
+# ]
+
 # SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # SECURE_SSL_REDIRECT = True
 # SESSION_COOKIE_SECURE = True

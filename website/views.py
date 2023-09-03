@@ -2,135 +2,33 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from .filters import DavomatFilter
-from .models import Expense, Science, Type_of_Admin,Permission,Admin,\
+from .models import Expense, InCome, Science, Type_of_Admin,Permission,Admin,\
     Teacher,Employer,Student,Parent,Chat_room,Message,Davomat,\
     Student_Pay
-from .serializers import AdminUpdateSerializer, EmployerUpdateSerializer, \
+from .serializers import AdminUpdateSerializer, EmployerUpdateSerializer, InCome_Serializer, \
     ParentUpdateSerializer, Scince_Serializer, StudentUpdateSerializer, TeacherUpdateSerializer, \
     Type_of_Admin_Serializer,Permission_Serializer,AdminSerializer,\
     TeacherSerializer,EmployerSerializer,StudentSerializer,ParentSerializer,\
-    ChatRoomSerializer,MessageSerializer,UserSerializer,DavomatSerializer,\
+    ChatRoomSerializer,MessageSerializer,DavomatSerializer,\
     Student_Pay_Serializer,Expense_Serializer
 from rest_framework.permissions import AllowAny
 from rest_framework import status
-from django.contrib.auth.models import User
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
-from rest_framework.authtoken.models import Token
+import datetime
 
-class Users(APIView):
-    serializer_class=UserSerializer
-    filterset_fields=["first_name"]
-    permission_classes=[AllowAny]
-    def get(self,request,*args,**kwargs):
-        mydict={
-        "example":
-        {
-            "admin":{
-                "user": {
-                    "username": "username //required",
-                    "password": "password //required"
-                },
-                "type": "admin //required",
-                "model": {
-                    "first_name": "ism //required",
-                    "last_name": "familiya //required",
-                    "admin_type": "id //required",
-                    'permission':"[1,2,3] //optional"
-                }
-            },
-            "teacher":{
-                "user": {
-                    "username": "username //required",
-                    "password": "password //required"
-                },
-                "type": "teacher //required",
-                "model": {
-                    "first_name": "ism //required",
-                    "last_name": "familiya //required",
-                    "lavozim": "lavozim //required",
-                }
-            },
-            "employer":{
-                "user": {
-                    "username": "username //required",
-                    "password": "password //required"
-                },
-                "type": "employer //required",
-                "model": {
-                    "first_name": "ism //required",
-                    "last_name": "familiya //required",
-                    "lavozim": "lavozim //required",
-                }
-            },
-            "student":{
-                "user": {
-                    "username": "username //required",
-                    "password": "password //required"
-                },
-                "type": "student //required",
-                "model": {
-                    "first_name": "ism //required",
-                    "last_name": "familiya //required",
-                }
-            },
-            "parent":{
-                "user": {
-                    "username": "username //required",
-                    "password": "password //required"
-                },
-                "type": "parent //required",
-                "model": {
-                    "first_name": "ism //required",
-                    "last_name": "familiya //required",
-                    "children":"[1,2,3] //optional"
-                }
-            },
-        }
-    }
-        return Response(mydict,status=200)
-    def post(self,request,*args,**kwargs):
-        user=request.data["user"]
-        user_type=request.data['type']
-        data=dict(request.data)['model']
-        try:
-            
-            match user_type:
-                case 'admin':
-                    myuser=User.objects.create_user(username=user['username'],password=user['password'],first_name=Type_of_Admin.objects.get(id=data['admin_type']))#user_type
-                    admin=Admin.objects.create(user=myuser,first_name=data['first_name'],last_name=data['last_name'],types=Type_of_Admin.objects.get(id=data['admin_type']))
-                    if data.get("permission"):
-                        for i in data.get("permission"):
-                            admin.permissions.add(Permission.objects.get(id=i))
-                    serializer=AdminSerializer(admin,many=False)
-                    return Response({"teacher":serializer.data})
-                case 'teacher':
-                    myuser=User.objects.create_user(username=user['username'],password=user['password'],first_name=user_type)
-                    teacher=Teacher.objects.create(user=myuser,first_name=data['first_name'],last_name=data['last_name'],lavozim=data['lavozim'])
-                    serializer=TeacherSerializer(teacher,many=False)
-                    return Response({"teacher":serializer.data})
-                case 'employer':
-                    myuser=User.objects.create_user(username=user['username'],password=user['password'],first_name=user_type)
-                    teacher=Employer.objects.create(user=myuser,first_name=data['first_name'],last_name=data['last_name'],lavozim=data['lavozim'])
-                    serializer=EmployerSerializer(teacher,many=False)
-                    return Response({"employer":serializer.data})
-                case 'student':
-                    myuser=User.objects.create_user(username=user['username'],password=user['password'],first_name=user_type)
-                    student=Student.objects.create(user=myuser,first_name=data['first_name'],last_name=data['last_name'])
-                    serializer=StudentSerializer(student,many=False)
-                    return Response({"student":serializer.data})
-                case 'parent':
-                    myuser=User.objects.create_user(username=user['username'],password=user['password'],first_name=user_type)
-                    parent=Parent.objects.create(user=myuser,first_name=data['first_name'],last_name=data['last_name'])
-                    if data.get("children"):
-                        for i in data.get("children"):
-                            parent.children.add(Student.objects.get(id=i))
-                    serializer=ParentSerializer(parent,many=False)
-                    return Response({"parent":serializer.data})
-        except:
-            myuser.delete()
-            return Response({"result":"nimadir xato ketdi!!!"},status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response(request.data,status=200)
+def get_date(types):
+    current_date = datetime.datetime.now()
+    # formatted_date = current_date.strftime("%Y_%m_%d")
+    if types=="year":
+        return current_date.year
+    elif types=="month":
+        return current_date.month
+    elif types=="week":
+        return current_date.isocalendar()[1]
+    elif types=="day":
+        return current_date.day
+
 
 class StudentxlsView(APIView):
     permission_classes=[AllowAny]
@@ -313,8 +211,8 @@ class MessageView(ModelViewSet):
     serializer_class=MessageSerializer
     filterset_fields=["chat_room","from_user","to_user","message",'date']
 
-from django.db.models import Q
 
+from django.db.models import Q
 class DavomatView(ModelViewSet):
     queryset = Davomat.objects.all()
     serializer_class = DavomatSerializer
@@ -349,8 +247,135 @@ class Student_PayView(ModelViewSet):
     queryset=Student_Pay.objects.all()
     serializer_class=Student_Pay_Serializer
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        amount=int(request.data['summa'])
+        income_general=InCome.objects.get_or_create(types="GENERAL")
+        income_general[0].amount+=amount
+        income_general[0].save()
+        income_yearly=InCome.objects.get_or_create(types="YEARLY",date__year=get_date("year"))
+        income_yearly[0].amount+=amount
+        income_yearly[0].save()
+        income_monthly=InCome.objects.get_or_create(types="MONTHLY",date__month=get_date("month"))
+        income_monthly[0].amount+=amount
+        income_monthly[0].save()
+        income_weekly=InCome.objects.get_or_create(types="WEEKLY",date__week=get_date("week"))
+        income_weekly[0].amount+=amount
+        income_weekly[0].save()
+        income_daily=InCome.objects.get_or_create(types="DAILY",date__day=get_date("day"))
+        income_daily[0].amount+=amount
+        income_daily[0].save()
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        # print(request.data)
+        amount=int(request.data['summa'])
+        income_general=InCome.objects.get_or_create(types="GENERAL")
+        income_general[0].amount+=amount
+        income_general[0].save()
+        income_yearly=InCome.objects.get_or_create(types="YEARLY",date__year=get_date("year"))
+        income_yearly[0].amount+=amount
+        income_yearly[0].save()
+        income_monthly=InCome.objects.get_or_create(types="MONTHLY",date__month=get_date("month"))
+        income_monthly[0].amount+=amount
+        income_monthly[0].save()
+        income_weekly=InCome.objects.get_or_create(types="WEEKLY",date__week=get_date("week"))
+        income_weekly[0].amount+=amount
+        income_weekly[0].save()
+        income_daily=InCome.objects.get_or_create(types="DAILY",date__day=get_date("day"))
+        income_daily[0].amount+=amount
+        income_daily[0].save()
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+class InComeView(ModelViewSet):
+    queryset=InCome.objects.all()
+    serializer_class=InCome_Serializer
+    filterset_fields=["types"]
+
+    def list(self, request, *args, **kwargs):
+        # print(Student_Pay.objects.latest('date').date)
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    # filterset_fields=["id","title","slug"]
+    # ["tasischi","manager","finance","admin","teacher","employer","student","parent"]
+
 class ExpenseView(ModelViewSet):
     queryset=Expense.objects.all()
     serializer_class=Expense_Serializer
-    # filterset_fields=["id","title","slug"]
-    # ["tasischi","manager","finance","admin","teacher","employer","student","parent"]
+    filterset_fields=["types"]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        amount=int(request.data['amount'])
+        income_general=InCome.objects.get_or_create(types="GENERAL")
+        if income_general[0].amount>amount:
+            income_general[0].amount-=amount
+            income_general[0].save()
+            exponse_yearly=InCome.objects.get_or_create(types="YEARLY",date__year=get_date("year"))
+            exponse_yearly[0].amount-=amount
+            exponse_yearly[0].save()
+            exponse_monthly=InCome.objects.get_or_create(types="MONTHLY",date__month=get_date("month"))
+            exponse_monthly[0].amount-=amount
+            exponse_monthly[0].save()
+            exponse_weekly=InCome.objects.get_or_create(types="WEEKLY",date__week=get_date("week"))
+            exponse_weekly[0].amount-=amount
+            exponse_weekly[0].save()
+            exponse_daily=InCome.objects.get_or_create(types="DAILY",date__day=get_date("day"))
+            exponse_daily[0].amount-=amount
+            exponse_daily[0].save()
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        # print(request.data)
+        amount=int(request.data['amount'])
+        income_general=InCome.objects.get_or_create(types="GENERAL")
+        if income_general[0].amount>amount:
+            income_general[0].amount-=amount
+            income_general[0].save()
+            exponse_yearly=InCome.objects.get_or_create(types="YEARLY",date__year=get_date("year"))
+            exponse_yearly[0].amount-=amount
+            exponse_yearly[0].save()
+            exponse_monthly=InCome.objects.get_or_create(types="MONTHLY",date__month=get_date("month"))
+            exponse_monthly[0].amount-=amount
+            exponse_monthly[0].save()
+            exponse_weekly=InCome.objects.get_or_create(types="WEEKLY",date__week=get_date("week"))
+            exponse_weekly[0].amount-=amount
+            exponse_weekly[0].save()
+            exponse_daily=InCome.objects.get_or_create(types="DAILY",date__day=get_date("day"))
+            exponse_daily[0].amount-=amount
+            exponse_daily[0].save()
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
