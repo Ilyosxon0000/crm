@@ -32,8 +32,11 @@ def get_date(types):
 
 class StudentxlsView(APIView):
     permission_classes=[AllowAny]
+    
+    def get(self,request,*args,**kwargs):
+        return Response({"message":"FormData","student_table":"student_table.xls"},status=200)
+    
     def post(self,request,*args,**kwargs):
-
         return Response(request.data,status=200)
 
 class TypeView(ModelViewSet):

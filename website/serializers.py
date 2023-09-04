@@ -264,7 +264,7 @@ class MessageSerializer(serializers.ModelSerializer):
     
 class DavomatSerializer(serializers.ModelSerializer):
     user_dict=serializers.SerializerMethodField('get_user_dict')
-    types=serializers.CharField(source="user.first_name")
+    types=serializers.ReadOnlyField(source="user.first_name")
     class Meta:
         model=Davomat
         fields=("id","user",'types',"user_dict","davomat","sabab","date")
@@ -273,6 +273,7 @@ class DavomatSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         serializer_context = {'request': request }
         user = obj.user
+        print(user)
         if user.first_name=="employer":
             serializer=EmployerSerializer(user.employer,many=False, context=serializer_context)
         elif user.first_name=="teacher":
@@ -281,8 +282,9 @@ class DavomatSerializer(serializers.ModelSerializer):
             serializer=StudentSerializer(user.student,many=False, context=serializer_context)
         elif user.first_name=="parent":
             serializer=ParentSerializer(user.parent,many=False, context=serializer_context)
-        else:
+        elif user.first_name=="admin":
             serializer=AdminSerializer(user.admin,many=False, context=serializer_context)
+        # serializer=StudentSerializer(user.student,many=False, context=serializer_context)
         # serializer = UserSerializer(user, many=False, context=serializer_context)
         return serializer.data
 
