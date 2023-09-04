@@ -147,6 +147,43 @@ class EmployerView(ModelViewSet):
     queryset=Employer.objects.all()
     serializer_class=EmployerSerializer
 
+    def update(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        data=request.data
+
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+
+        if data.get('user.username',False):
+            queryset = queryset.filter(user__username=data['user.username'])
+            if len(queryset)!=True:
+                instance.user.username=data['user.username']
+                instance.user.save()
+        
+        file_field=[
+            'image'
+            ]
+        del_key=[]
+
+        my_dict=data.dict()
+        
+        for key in my_dict.keys():
+            if key in file_field:
+                if type(data[key])==str:
+                    del_key.append(key)
+        for item in del_key:
+            my_dict.pop(item)
+        serializer = self.get_serializer(instance, data=my_dict, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -166,6 +203,46 @@ class EmployerView(ModelViewSet):
 class StudentView(ModelViewSet):
     queryset=Student.objects.all()
     serializer_class=StudentSerializer
+
+    def update(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        data=request.data
+
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+
+        if data.get('user.username',False):
+            queryset = queryset.filter(user__username=data['user.username'])
+            if len(queryset)!=True:
+                instance.user.username=data['user.username']
+                instance.user.save()
+        
+        file_field=[
+            'image',
+            "id_card_parents",
+            "picture_3x4",
+            "school_tab",
+            ]
+        del_key=[]
+
+        my_dict=data.dict()
+        
+        for key in my_dict.keys():
+            if key in file_field:
+                if type(data[key])==str:
+                    del_key.append(key)
+        for item in del_key:
+            my_dict.pop(item)
+        serializer = self.get_serializer(instance, data=my_dict, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -187,6 +264,43 @@ class StudentView(ModelViewSet):
 class ParentView(ModelViewSet):
     queryset=Parent.objects.all()
     serializer_class=ParentSerializer
+
+    def update(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        data=request.data
+
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+
+        if data.get('user.username',False):
+            queryset = queryset.filter(user__username=data['user.username'])
+            if len(queryset)!=True:
+                instance.user.username=data['user.username']
+                instance.user.save()
+        
+        file_field=[
+            'image',
+            ]
+        del_key=[]
+
+        my_dict=data.dict()
+        
+        for key in my_dict.keys():
+            if key in file_field:
+                if type(data[key])==str:
+                    del_key.append(key)
+        for item in del_key:
+            my_dict.pop(item)
+        serializer = self.get_serializer(instance, data=my_dict, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
