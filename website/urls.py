@@ -7,6 +7,7 @@ from .router import MyRouter,Custom_List
 from .token import TokenCreateView
 
 Custom_List.append("token/login")
+Custom_List.append("student/xlsx")
 
 router=MyRouter()
 router.register('type-admin',TypeView,basename='type-admin')
@@ -32,5 +33,5 @@ urlpatterns = [
         version="1.0.0"
     ), name='openapi-schema'),
     path('token/login/',TokenCreateView.as_view()),
-    # path('student/xls/',StudentxlsView.as_view()),
+    path('student/xls/',StudentxlsView.as_view()),
 ]+router.urls
