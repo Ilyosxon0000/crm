@@ -106,17 +106,17 @@ class Lesson(models.Model):
         verbose_name_plural="Darslar"
 
 class Grade(models.Model):
-    GRADE_CHOICES = [
-        (1, 'One'),
-        (2, 'Two'),
-        (3, 'Three'),
-        (4, 'Four'),
-        (5, 'Five'),
-    ]
+    GRADE_CHOICES = (
+        (1, "Bir"),
+        (2, "Ikki"),
+        (3, "Uch"),
+        (4, "To'rt"),
+        (5, "Besh"),
+    )
 
     grade = models.IntegerField(
         choices=GRADE_CHOICES,
-        default=1  # You can set a default value if needed
+        default=1
     )
     lesson=models.ForeignKey(conf.LESSON,related_name='grades',on_delete=models.CASCADE)
     grade_datetime=models.DateTimeField(blank=True,null=True)
