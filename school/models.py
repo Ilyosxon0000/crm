@@ -66,10 +66,11 @@ class Room(models.Model):
         verbose_name_plural="Xonalar"
 
 class Lesson_Time(models.Model):
-    name=models.CharField(max_length=255)
+    begin_time = models.TimeField()
+    end_time = models.TimeField()
 
     def __str__(self):
-        return self.name
+        return f"{self.begin_time.strftime('%H:%M')} - {self.end_time.strftime('%H:%M')}"
 
     class Meta:
         verbose_name_plural="Dars soatlari"

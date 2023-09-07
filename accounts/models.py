@@ -56,7 +56,7 @@ class Admin(models.Model):
         return f"admin:{self.user.username}"
     
     def save(self, *args, **kwargs):
-        self.user.user.type_user='admin'
+        self.user.type_user='admin'
         self.user.save()
         self.id=self.user.id
         super().save(*args, **kwargs)
