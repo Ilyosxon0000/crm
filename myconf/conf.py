@@ -1,4 +1,10 @@
 import datetime
+from django.contrib.auth import get_user_model
+from django.apps import apps
+
+def get_model(Model):
+    model_class = apps.get_model(Model, require_ready=False)
+    return model_class
 # global func
 def get_date(types):
     current_date = datetime.datetime.now()
@@ -13,11 +19,26 @@ def get_date(types):
         return current_date.weekday
     elif types=="day":
         return current_date.day
-# school app models
-SCIENCE="school.Science"#Fanlar modeli
-CLASS="school.Class"#Sinf modeli
+    elif types=="current_date":
+        return current_date
 
 # accounts app models
+TYPE_OF_ADMIN="accounts.Type_of_Admin"#Teacher modeli
+PERMISSION="accounts.Permission"#Teacher modeli
+ADMIN="accounts.ADMIN"#Teacher modeli
 TEACHER="accounts.Teacher"#Teacher modeli
 EMPLOYER="accounts.Employer"#Xodim modeli
 STUDENT="accounts.Student"#Xodim modeli
+PARENT="accounts.Parent"#Xodim modeli
+
+# school app models
+SCIENCE="school.Science"#Fanlar modeli
+CLASS="school.Class"#Sinf modeli
+ATTENDANCE="school.Attendance"#Davomat modeli
+ROOM="school.Room"#Davomat modeli
+LESSON_TIME="school.Lesson_Time"#Dars soati modeli
+LESSON="school.Lesson"#Davomat modeli
+
+# finance app models
+FINANCE="finance.Finance"
+STUDENT_PAY="finance.Student_Pay"

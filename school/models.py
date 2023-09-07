@@ -1,3 +1,4 @@
+from typing import Iterable, Optional
 from django.db import models
 from django.utils.text import slugify
 from myconf import conf
@@ -54,3 +55,76 @@ class Attendance(models.Model):
 
     class Meta:
         verbose_name_plural="Davomatlar"
+
+class Room(models.Model):
+    name=models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name_plural="Xonalar"
+
+class Lesson_Time(models.Model):
+    name=models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural="Dars soatlari"
+
+class Lesson(models.Model):
+    MONDAY="MONDAY"
+    TUESDAY="TUESDAY"
+    WEDNESDAY="WEDNESDAY"
+    THURSDAY="THURSDAY"
+    FRIDAY="FRIDAY"
+    SATURDAY="SATURDAY"
+    DAY_CHOICES=(
+        (MONDAY,"Dushanba"),
+        (TUESDAY,"Seshanba"),
+        (WEDNESDAY,"Chorshanba"),
+        (THURSDAY,"Payshanba"),
+        (FRIDAY,"Juma"),
+        (SATURDAY,"Shanba"),
+    )
+    teacher=models.ForeignKey(conf.TEACHER,related_name='lessons',on_delete=models.CASCADE)
+    science=models.ForeignKey(conf.SCIENCE,related_name="lessons",on_delete=models.CASCADE)
+    room=models.ForeignKey(conf.ROOM,related_name='lessons',on_delete=models.CASCADE)
+    lesson_date=models.CharField(
+        max_length=10,
+        choices=DAY_CHOICES,
+        default='monday'  # You can set a default value if needed
+    )
+    lesson_time=models.ForeignKey(Lesson_Time,related_name="lessons",on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"fan:{self.science};O'qituvchi:{self.teacher};Xona:{self.room};Hafta kuni:{self.lesson_date}"
+
+    class Meta:
+        verbose_name_plural="Darslar"
+
+class Grade(models.Model):
+    GRADE_CHOICES = [
+        (1, 'One'),
+        (2, 'Two'),
+        (3, 'Three'),
+        (4, 'Four'),
+        (5, 'Five'),
+    ]
+
+    grade = models.IntegerField(
+        choices=GRADE_CHOICES,
+        default=1  # You can set a default value if needed
+    )
+    lesson=models.ForeignKey(conf.LESSON,related_name='grades',on_delete=models.CASCADE)
+    grade_datetime=models.DateTimeField(blank=True,null=True)
+
+    def save(self, *args, **kwargs):
+        if self.grade_datetime!=True:
+            self.grade_datetime = conf.get_date("current_date")
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name_plural="Baholar"

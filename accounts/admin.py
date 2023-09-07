@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import UserProfile,Type_of_Admin,Permission,Admin,Teacher
+from django.contrib.auth import get_user_model
+from .models import Type_of_Admin,Permission,Admin,Teacher
+from myconf import conf
 from django.utils.translation import gettext_lazy as _
 
 
@@ -34,8 +36,11 @@ class MyUserAdmin(UserAdmin):
         ),
         (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
-admin.site.register(UserProfile, MyUserAdmin)
-admin.site.register(Type_of_Admin)
-admin.site.register(Permission)
-admin.site.register(Admin)
-admin.site.register(Teacher)
+admin.site.register(get_user_model(), MyUserAdmin)
+admin.site.register(conf.get_model(conf.TYPE_OF_ADMIN))
+admin.site.register(conf.get_model(conf.PERMISSION))
+admin.site.register(conf.get_model(conf.ADMIN))
+admin.site.register(conf.get_model(conf.TEACHER))
+admin.site.register(conf.get_model(conf.EMPLOYER))
+admin.site.register(conf.get_model(conf.STUDENT))
+admin.site.register(conf.get_model(conf.PARENT))

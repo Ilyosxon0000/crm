@@ -53,7 +53,6 @@ INSTALLED_APPS = [
     'school',
     'accounts',
     'finance',
-    'chat_room',
     "myconf"
 ]
 AUTH_USER_MODEL = 'accounts.UserProfile'
