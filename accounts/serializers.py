@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
             "type_user"
             ]
         extra_kwargs = {'password': {'write_only': True}}
-    
+      
     def create(self, validated_data):
         password = validated_data.pop('password')
         user = get_user_model().objects.create_user(**validated_data)
@@ -67,8 +67,10 @@ class TeacherSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         user_data = validated_data.pop('user')  # Extract user data
+        sciences_data = validated_data.pop('sciences', []) 
         user_instance = UserSerializer().create(user_data)  # Create user
         teacher = get_model(conf.TEACHER).objects.create(user=user_instance, **validated_data)
+        teacher.sciences.set(sciences_data)
         return teacher
 
 class EmployerSerializer(serializers.ModelSerializer):
@@ -106,7 +108,9 @@ class ParentSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         user_data = validated_data.pop('user')  # Extract user data
+        children = validated_data.pop('children', []) 
         user_instance = UserSerializer().create(user_data)  # Create user
         parent = get_model(conf.PARENT).objects.create(user=user_instance, **validated_data)
+        parent.children.set(children)
         return parent
 

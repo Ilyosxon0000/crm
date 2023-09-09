@@ -16,11 +16,11 @@ class Finance(models.Model):
         (STUDENT_PAY,"o'quvchilar to'lovi"),
         (OTHER,"boshqa"),
     )
-    student=models.ForeignKey(conf.STUDENT,related_name='finance_pays',on_delete=models.CASCADE)
-    teacher=models.ForeignKey(conf.TEACHER,related_name='salaries',on_delete=models.CASCADE)
+    student=models.ForeignKey(conf.STUDENT,related_name='finance_pays',on_delete=models.CASCADE,blank=True,null=True)
+    teacher=models.ForeignKey(conf.TEACHER,related_name='salaries',on_delete=models.CASCADE,blank=True,null=True)
     amount=models.IntegerField(default=0,verbose_name="pul miqdori:")
     types_finance=models.CharField(max_length=60,choices=STATUS,verbose_name="Chiqim yoki Kirim turi:")
-    types=models.CharField(max_length=60,choices=STATUS,blank=True,null=True,verbose_name="(Chiqim,Kirim) turi:")
+    types=models.CharField(max_length=60,choices=STATUS_FINANCE,blank=True,null=True,verbose_name="(Chiqim,Kirim) turi:")
     comment=models.TextField(blank=True,null=True,verbose_name="Chiqim sababi:")
     date=models.DateField(auto_now_add=True)
 

@@ -125,6 +125,9 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'Asia/Tashkent'
+TIME_FORMAT = 'H:i'
+DATETIME_FORMAT = 'Y-m-d H:i'
+
 
 USE_I18N = True
 
@@ -152,6 +155,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 REST_FRAMEWORK = {
+    # 'TIME_INPUT_FORMATS': ['%H:%M:%S'],
+    # 'DATETIME_FORMAT': "%m/%d/%Y %H:%M:%S",
     # 'DATETIME_FORMAT':'%d.%m.%Y %H:%M',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',

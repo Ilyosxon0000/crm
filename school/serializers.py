@@ -23,6 +23,8 @@ class RoomSerializer(serializers.ModelSerializer):
         fields="__all__"
 
 class Lesson_Time_Serializer(serializers.ModelSerializer):
+    begin_time=serializers.TimeField(format='%H:%M')
+    end_time=serializers.TimeField(format='%H:%M')
     class Meta:
         model=get_model(conf.LESSON_TIME)
         fields="__all__"
@@ -32,6 +34,14 @@ class Lesson_Serializer(serializers.ModelSerializer):
         model=get_model(conf.LESSON)
         fields="__all__"
 
+class TableLessonSerializer(serializers.Serializer):
+    # current_date = serializers.CharField() 
+
+    class Meta:
+        model = get_model(conf.LESSON)
+        fields = ('id', 'lesson_date', 'teacher', 'science', 'student_class', 'room', 'lesson_time')
+
+    
 class Grade_Serializer(serializers.ModelSerializer):
     class Meta:
         model=get_model(conf.GRADE)

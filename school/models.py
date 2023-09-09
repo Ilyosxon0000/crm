@@ -21,11 +21,15 @@ class Science(models.Model):
 
 class Class(models.Model):
     title=models.CharField(max_length=255)
-    slug=models.SlugField()
+    slug=models.SlugField(blank=True,null=True)
     teacher=models.ForeignKey(conf.TEACHER,related_name='sinflar',on_delete=models.CASCADE)
     
     def __str__(self):
-        return f"teacher:{self.user.username}"
+        return f"class:{self.title}"
+
+    def save(self, *args, **kwargs):
+        self.slug=slugify(self.title)
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural="Sinflar"
@@ -92,6 +96,7 @@ class Lesson(models.Model):
     )
     teacher=models.ForeignKey(conf.TEACHER,related_name='lessons',on_delete=models.CASCADE)
     science=models.ForeignKey(conf.SCIENCE,related_name="lessons",on_delete=models.CASCADE)
+    student_class=models.ForeignKey(conf.CLASS,related_name='lessons',on_delete=models.CASCADE)
     room=models.ForeignKey(conf.ROOM,related_name='lessons',on_delete=models.CASCADE)
     lesson_date=models.CharField(
         max_length=10,
@@ -105,6 +110,7 @@ class Lesson(models.Model):
 
     class Meta:
         verbose_name_plural="Darslar"
+        ordering = ['lesson_date', 'lesson_time']
 
 class Grade(models.Model):
     GRADE_CHOICES = (

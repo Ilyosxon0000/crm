@@ -1,5 +1,4 @@
 import datetime
-from django.contrib.auth import get_user_model
 from django.apps import apps
 
 def get_model(Model):
@@ -43,3 +42,21 @@ GRADE="school.Grade"#Davomat modeli
 # finance app models
 FINANCE="finance.Finance"
 STUDENT_PAY="finance.Student_Pay"
+
+def all_days():
+    import datetime
+    current_year = datetime.datetime.now().year
+    start_date = datetime.datetime(current_year, 1, 1)
+    end_date = datetime.datetime(current_year, 12, 31)
+    all_days_of_year = []
+    current_date = start_date
+    while current_date <= end_date:
+        all_days_of_year.append(current_date)
+        current_date += datetime.timedelta(days=1)
+    return all_days_of_year
+    
+def get_type_name_field(model,types):
+    fields=get_model(model)._meta.get_fields()
+    file_fields = [field.name for field in fields if isinstance(field, types)]
+    return file_fields
+
