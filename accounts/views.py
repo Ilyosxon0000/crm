@@ -19,7 +19,6 @@ def global_update(self, request, *args, **kwargs):
         if len(queryset)!=True:
             instance.user.username=data['user.username']
             instance.user.save()
-
     if type(data.get('user.image'))!=str:
         user_data = {
             'first_name': data.get('user.first_name'),
@@ -35,8 +34,6 @@ def global_update(self, request, *args, **kwargs):
             'middle_name': data.get('user.middle_name'),
             'type_user': data.get('user.type_user'),
         }
-
-    # Update the user model with the extracted user_data
     user_serializer = serializers.UserSerializer(instance=instance.user, data=user_data, partial=True)
     user_serializer.is_valid(raise_exception=True)
     user_serializer.save()
@@ -44,19 +41,14 @@ def global_update(self, request, *args, **kwargs):
     model=kwargs['model']
     types=kwargs['types']
     file_fields = get_type_name_field(model,types)
-    print(file_fields)
-    # data = {key: value for key, value in data.items() if key not in file_fields}
     del_key=[]
-
     my_dict=data.dict()
-
     for key in my_dict.keys():
         if key in file_fields:
             if type(data[key])==str:
                 del_key.append(key)
     for item in del_key:
         my_dict.pop(item)
-
     serializer = self.get_serializer(instance, data=my_dict, partial=True)
     serializer.is_valid(raise_exception=True)
     self.perform_update(serializer)

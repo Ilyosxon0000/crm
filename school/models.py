@@ -1,9 +1,9 @@
-from typing import Iterable, Optional
 from django.db import models
 from django.utils.text import slugify
 from myconf import conf
 from django.contrib.auth import get_user_model
 import json
+from django.core.exceptions import ValidationError
 
 class Science(models.Model):
     title=models.CharField(max_length=255)
@@ -44,9 +44,15 @@ class Attendance(models.Model):
         (SABABSIZ,'Sababsiz'),
         (KELGAN,'kelgan'),
     )
-    attendance_type=models.CharField(choices=CHOICES_DAVOMAT,max_length=50,verbose_name="davomat turi:")
-    date=models.DateField(auto_now_add=True)
+    attendance_type=models.CharField(choices=CHOICES_DAVOMAT,max_length=50,verbose_name="davomat turi:",default=SABABSIZ)
+    date=models.DateTimeField(blank=True, null=True)
+    date_leave = models.DateTimeField(auto_now=True)
     reason=models.TextField(blank=True,null=True,verbose_name="sabab(Agar sababli turida bo'lsa):")
+
+    def save(self, *args, **kwargs):
+        if self.attendance_type==self.KELGAN:
+            self.date=conf.get_date('current_date')
+        super().save(*args, **kwargs)
 
     def get_date(self):
         return self.date.strftime('%d.%m.%Y %H:%M')
@@ -55,7 +61,7 @@ class Attendance(models.Model):
         return json.dumps(self.date)
     
     def __str__(self) -> str:
-        return f"{self.user}:{self.davomat};{self.date}"
+        return f"{self.user.username}:{self.attendance_type};{self.date}"
 
     class Meta:
         verbose_name_plural="Davomatlar"
@@ -125,6 +131,7 @@ class Grade(models.Model):
         choices=GRADE_CHOICES,
         default=1
     )
+    student=models.ForeignKey(conf.STUDENT,related_name="grades",on_delete=models.CASCADE)
     lesson=models.ForeignKey(conf.LESSON,related_name='grades',on_delete=models.CASCADE)
     grade_datetime=models.DateTimeField(blank=True,null=True)
 
@@ -135,3 +142,21 @@ class Grade(models.Model):
 
     class Meta:
         verbose_name_plural="Baholar"
+
+class Task(models.Model):
+    from_user=models.ForeignKey(get_user_model(),related_name='from_tasks',on_delete=models.CASCADE)
+    to_user=models.ForeignKey(get_user_model(),related_name='to_tasks',on_delete=models.CASCADE)
+    task_title=models.CharField(max_length=255)
+    task_message=models.TextField()
+    complete_to_user=models.BooleanField(default=False)
+    complete_from_user=models.BooleanField(default=False)
+    created_date=models.DateTimeField(auto_now_add=True)
+    change_date=models.DateTimeField(auto_now=True)
+    begin_date=models.DateTimeField(blank=True,null=True)
+    end_date=models.DateTimeField(blank=True,null=True)
+
+
+    def save(self, *args, **kwargs):
+        if self.from_user == self.to_user:
+            raise ValidationError("from_user and to_user cannot be the same.")
+        super().save(*args, **kwargs)

@@ -93,8 +93,6 @@ from rest_framework.response import Response
 #         serialized_data = serializers.YearSerializer(data.values(), many=True)
 #         return Response(serialized_data.data)
 
-from collections import defaultdict
-
 class FinanceView(ModelViewSet):
     queryset = get_model(conf.FINANCE).objects.all()
     serializer_class = serializers.FinanceSerializer

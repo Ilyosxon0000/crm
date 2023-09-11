@@ -9,5 +9,6 @@ router.register("rooms",views.RoomView,basename="rooms")
 router.register("lesson_times",views.Lesson_TimeView,basename="lesson_times")
 router.register("lessons",views.LessonView,basename="lessons")
 router.register("grades",views.GradeView,basename="grades")
+router.register("tasks",views.TaskView,basename="tasks")
 
 urlpatterns = []+router.urls

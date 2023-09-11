@@ -2,6 +2,7 @@ from rest_framework import serializers
 from myconf.conf import get_model
 from myconf import conf
 from django.contrib.auth import get_user_model
+from school.serializers import ScienceSerializer
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(required=False, style={"input_type": "password"},write_only=True)
@@ -39,6 +40,8 @@ class Permission_Serializer(serializers.ModelSerializer):
 
 class AdminSerializer(serializers.ModelSerializer):
     user=UserSerializer()
+    type_dict=serializers.SerializerMethodField('get_type_dict')
+    permissions_dict=serializers.SerializerMethodField('get_permissions_dict')
 
     class Meta:
         model=get_model(conf.ADMIN)
@@ -47,19 +50,31 @@ class AdminSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user_data = validated_data.pop('user')  # Extract user data
         permissions_data = validated_data.pop('permissions', [])  # Extract permissions data (if provided)
-        
         user_instance = UserSerializer().create(user_data)  # Create user
-
-        # Create admin
         admin = get_model(conf.ADMIN).objects.create(user=user_instance, **validated_data)
-
-        # Set permissions using the .set() method
         admin.permissions.set(permissions_data)
-
         return admin
+
+    def get_type_dict(self, obj):
+        request = self.context.get('request')
+        serializer_context = {'request': request }
+        types = obj.types
+        serializer = Type_of_Admin_Serializer(types, many=False, context=serializer_context)
+        return serializer.data
+    
+    def get_permissions_dict(self, obj):
+        request = self.context.get('request')
+        serializer_context = {'request': request }
+        types = obj.permissions.all()
+        if types:
+            serializer = Permission_Serializer(types, many=True, context=serializer_context)
+            return serializer.data
+        else:
+            return []
     
 class TeacherSerializer(serializers.ModelSerializer):
     user=UserSerializer()
+    sciences_dict=serializers.SerializerMethodField('get_sciences_dict')
 
     class Meta:
         model=get_model(conf.TEACHER)
@@ -72,6 +87,16 @@ class TeacherSerializer(serializers.ModelSerializer):
         teacher = get_model(conf.TEACHER).objects.create(user=user_instance, **validated_data)
         teacher.sciences.set(sciences_data)
         return teacher
+    
+    def get_sciences_dict(self, obj):
+        request = self.context.get('request')
+        serializer_context = {'request': request }
+        sciences = obj.sciences.all()
+        if sciences:
+            serializer = ScienceSerializer(sciences, many=True, context=serializer_context)
+            return serializer.data
+        else:
+            return []
 
 class EmployerSerializer(serializers.ModelSerializer):
     user=UserSerializer()
@@ -101,6 +126,8 @@ class StudentSerializer(serializers.ModelSerializer):
 
 class ParentSerializer(serializers.ModelSerializer):
     user=UserSerializer()
+    children_dict=serializers.SerializerMethodField('get_children_dict')
+
 
     class Meta:
         model=get_model(conf.PARENT)
@@ -114,3 +141,9 @@ class ParentSerializer(serializers.ModelSerializer):
         parent.children.set(children)
         return parent
 
+    def get_children_dict(self, obj):
+        request = self.context.get('request')
+        serializer_context = {'request': request }
+        types = obj.children.all()
+        serializer = StudentSerializer(types, many=True, context=serializer_context)
+        return serializer.data

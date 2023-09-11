@@ -111,3 +111,8 @@ class LessonView(ModelViewSet):
 class GradeView(ModelViewSet):
     queryset=get_model(conf.GRADE).objects.all()
     serializer_class=serializers.Grade_Serializer
+
+class TaskView(ModelViewSet):
+    queryset=get_model(conf.TASK).objects.all()
+    serializer_class=serializers.TaskSerializer
+    filterset_fields="__all__"

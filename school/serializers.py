@@ -46,3 +46,8 @@ class Grade_Serializer(serializers.ModelSerializer):
     class Meta:
         model=get_model(conf.GRADE)
         fields="__all__"
+
+class TaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=get_model(conf.TASK)
+        fields="__all__"
