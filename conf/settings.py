@@ -24,6 +24,7 @@ SECRET_KEY = 'django-insecure-s0m@ij=z=e8n2x+obp#95ib4r5n@4*i29i9f(@cdzj+jdq6r1#
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+DEPLOY=True
 
 ALLOWED_HOSTS = []
 
@@ -138,12 +139,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
-MEDIA_URL='/media/'
-# STATIC_ROOT='./static'
-STATICFILES_DIRS=[
-    BASE_DIR / 'static'
-]
-MEDIA_ROOT=BASE_DIR / 'media'
+if DEPLOY:
+    MEDIA_ROOT = '/home/alxcrm/crm/media'
+    STATIC_ROOT = '/home/alxcrm/crm/static'
+    STATIC_URL = '/static/'
+else:
+    # STATIC_ROOT='./static'
+    STATICFILES_DIRS=[
+        BASE_DIR / 'static'
+    ]
+    MEDIA_ROOT=BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
