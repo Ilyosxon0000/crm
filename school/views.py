@@ -3,6 +3,7 @@ from myconf import conf
 from rest_framework.viewsets import ModelViewSet
 from . import serializers
 from rest_framework.response import Response
+from django.db.models import Q
 
 # Create your views here.
 import datetime
@@ -29,6 +30,19 @@ class ClassView(ModelViewSet):
 class AttendanceView(ModelViewSet):
     queryset=get_model(conf.ATTENDANCE).objects.all()
     serializer_class=serializers.AttendanceSerializer
+    def get_queryset(self):
+        queryset = self.queryset
+        type_user = self.request.GET.get('type')
+        type_list = ["tasischi", "manager", "finance", "admin", "employer"]
+        if type_user and type_user in type_list:
+            q_objects = [Q(user__type_user=i) for i in type_list]
+            combined_q_object = q_objects.pop()
+            for q_obj in q_objects:
+                combined_q_object |= q_obj
+            queryset = queryset.filter(combined_q_object)
+        elif type_user:
+            queryset = queryset.filter(user__type_user=type_user)
+        return queryset
 
 class RoomView(ModelViewSet):
     queryset=get_model(conf.ROOM).objects.all()

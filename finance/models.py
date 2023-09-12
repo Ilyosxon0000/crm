@@ -55,7 +55,7 @@ class Student_Pay(models.Model):
     student=models.ForeignKey(conf.STUDENT,related_name='pays',on_delete=models.CASCADE)
     status=models.CharField(max_length=255,choices=STATUS,verbose_name="holat:",default=NO_PAID)
     amount=models.IntegerField(default=0,verbose_name="pul miqdori:")
-    amount_2 = models.IntegerField(default=0)
+    amount_2 = models.IntegerField(default=-1_000)
     amount_3 = models.IntegerField(default=0)
     date=models.DateField(auto_now_add=True)
 
@@ -64,34 +64,54 @@ class Student_Pay(models.Model):
         return f"username:{self.student.user.username};status:{self.status};summa:{self.amount};date:{self.date.month};"
 
     def save(self, *args, **kwargs):
-        print(self.amount)
-        if self.amount>0:
-            Finance.objects.create(
-                student=self.student,
-                amount=self.amount,
-                types_finance=Finance.INCOME,
-                types=Finance.STUDENT_PAY
-            )
+        self.id = self.student.id
+        sum = 0
+        if self.tolovlar.exists():
+            all = self.tolovlar.all()
+            for i in all:
+                sum += i.paid
+        self.student.amount = sum + self.amount_2
+        self.student.save()        
+        # print(self.amount)
+        # if self.amount>0:
+        #     Finance.objects.create(
+        #         student=self.student,
+        #         amount=self.amount,
+        #         types_finance=Finance.INCOME,
+        #         types=Finance.STUDENT_PAY
+        #     )
 
-        if self.student.amount>0:
-            self.amount+=self.student.amount
-        if self.amount>0:
-            self.amount_2+=self.amount_2
-            self.student.amount+=self.amount_2
+        # if self.student.amount>0:
+        #     self.amount+=self.student.amount
+        # if self.amount>0:
+        #     self.amount_2+=self.amount_2
+        #     self.student.amount+=self.amount_2
 
-        if self.amount>=0 and self.amount_2>=0:
-            self.amount_status=self.PAID
-        elif self.amount>=0 and self.amount_2<0:
-            if self.amount + self.amount_2 >= 0:
-                self.amount_status=self.PAID
-            else:
-                self.amount_status=self.NO_PAID
-            self.amount_2 = self.amount + self.amount_2
-            self.student.amount+=self.amount_2
-            self.student.save()
-        else:
-            pass
+        # if self.amount>=0 and self.amount_2>=0:
+        #     self.amount_status=self.PAID
+        # elif self.amount>=0 and self.amount_2<0:
+        #     if self.amount + self.amount_2 >= 0:
+        #         self.amount_status=self.PAID
+        #     else:
+        #         self.amount_status=self.NO_PAID
+        #     self.amount_2 = self.amount + self.amount_2
+        #     self.student.amount+=self.amount_2
+        #     self.student.save()
+        # else:
+        #     pass
         super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural="O'quvchi To'lovlari"
+
+class Each_Pay(models.Model):
+    std_pay = models.ForeignKey(Student_Pay, related_name='tolovlar', on_delete=models.CASCADE)
+    paid = models.IntegerField()
+
+    def __str__(self) -> str:
+        return f'{self.std_pay.student.user.username} - {self.paid} som'
+    
+    def save(self, *args, **kwargs):
+        super(Each_Pay, self).save(*args, **kwargs)
+
+        self.std_pay.save()

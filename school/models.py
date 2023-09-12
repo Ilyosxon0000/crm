@@ -4,6 +4,7 @@ from myconf import conf
 from django.contrib.auth import get_user_model
 import json
 from django.core.exceptions import ValidationError
+from myconf.conf import get_model
 
 class Science(models.Model):
     title=models.CharField(max_length=255)
@@ -160,3 +161,16 @@ class Task(models.Model):
         if self.from_user == self.to_user:
             raise ValidationError("from_user and to_user cannot be the same.")
         super().save(*args, **kwargs)
+
+class Parent_Comments(models.Model):
+    parent=models.ForeignKey(get_model(conf.PARENT),related_name='parent_comments',on_delete=models.CASCADE)
+    admin=models.ForeignKey(get_model(conf.ADMIN),related_name='admin_answers',on_delete=models.CASCADE)
+    message=models.TextField()
+    created_date=models.DateTimeField(auto_now_add=True)
+    change_date=models.DateTimeField(auto_now=True)
+
+class Teacher_Lesson(models.Model):
+    teacher=models.ForeignKey(get_model(conf.TEACHER),related_name='teacher_lessons',on_delete=models.CASCADE)
+    message=models.TextField()
+    file_message=models.FileField(upload_to="uploads/message/%Y_%m_%d",blank=True,null=True)
+    date=models.DateTimeField(blank=True,null=True)
