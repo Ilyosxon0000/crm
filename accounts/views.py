@@ -12,6 +12,8 @@ from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.views import APIView
+from django.db.models import Q
+from django.db.models import Count
 
 # Create your views here.
 def global_update(self, request, *args, **kwargs):
@@ -139,6 +141,16 @@ class Admin_View(ModelViewSet):
 class Teacher_View(ModelViewSet):
     queryset=get_model(conf.TEACHER).objects.all()
     serializer_class=serializers.TeacherSerializer
+    @action(detail=False, methods=['GET'])
+    def teachers_for_class(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        teachers_with_classes = queryset.annotate(num_classes=Count('sinflar'))
+        for teacher in teachers_with_classes:
+            if teacher.num_classes == 0:
+                serializer = self.get_serializer(teacher, many=False)
+                return Response(serializer.data)
+        return Response({"message":"We haven't teachers"})
 
     def update(self, request, *args, **kwargs):
         serializer=global_update(self, request, *args, **kwargs,model=conf.TEACHER,types=models.FileField)
