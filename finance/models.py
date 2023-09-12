@@ -78,7 +78,7 @@ class Student_Pay(models.Model):
             self.status=self.PAID
         if self.student.amount>0:
             self.student.amount = self.balance
-        if self.student.amount<0 and self.student.latest_amount_date.year:
+        if self.student.amount<0 and self.student.latest_amount_date.year==conf.get_date('year') and self.student.latest_amount_date.month==conf.get_date('month'):
             self.student.amount += self.balance
             self.student.latest_amount_date=conf.get_date('current')
         self.student.save()
