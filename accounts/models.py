@@ -227,6 +227,7 @@ class Student(models.Model):
     school_tab = models.FileField(upload_to=student_school_tab_path, null=True, blank=True,verbose_name="Maktabdan Tabel asli 2-11-sinflar uchun:")
     medical_book = models.FileField(upload_to=student_medical_book_path, blank=True, null=True,verbose_name="Tibbiy Daftarcha (086):")
     amount=models.IntegerField(default=0,verbose_name="hisobidagi pul miqdori:")
+    latest_amount_date=models.DateTimeField(blank=True,null=True)
     amount_status=models.CharField(max_length=255,blank=True,null=True,choices=STATUS,verbose_name="hisobidagi pul miqdori turi:")
     
     def __str__(self):
