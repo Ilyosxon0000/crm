@@ -26,7 +26,10 @@ SECRET_KEY = 'django-insecure-s0m@ij=z=e8n2x+obp#95ib4r5n@4*i29i9f(@cdzj+jdq6r1#
 DEBUG = True
 DEPLOY=False
 
-ALLOWED_HOSTS = []
+if DEPLOY:
+    ALLOWED_HOSTS = ['alxcrm.pythonanywhere.com']
+else:
+    ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -140,8 +143,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 if DEPLOY:
-    MEDIA_ROOT = '/home/alxcrm/crm/media'
-    STATIC_ROOT = '/home/alxcrm/crm/static'
+    MEDIA_ROOT = '/home/alxcrm/conf/media'
+    MEDIA_URL = '/media/'
+    STATIC_ROOT = '/home/alxcrm/conf/static'
     STATIC_URL = '/static/'
 else:
     # STATIC_ROOT='./static'
