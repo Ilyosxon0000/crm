@@ -142,11 +142,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
 if DEPLOY:
-    MEDIA_ROOT = '/home/alxcrm/conf/media'
-    MEDIA_URL = '/media/'
-    STATIC_ROOT = '/home/alxcrm/conf/static'
-    STATIC_URL = '/static/'
+    # MEDIA_ROOT = '/home/alxcrm/conf/media'
+    # STATIC_ROOT = '/home/alxcrm/conf/static'
+    MEDIA_ROOT = '/home/alcrm/crm/media'
+    STATIC_ROOT = '/home/alcrm/crm/static'
 else:
     # STATIC_ROOT='./static'
     STATICFILES_DIRS=[
