@@ -177,7 +177,42 @@ class Employer_View(ModelViewSet):
 class Student_View(ModelViewSet):
     queryset=get_model(conf.STUDENT).objects.all()
     serializer_class=serializers.StudentSerializer
+    from rest_framework.parsers import MultiPartParser
+    @swagger_auto_schema(
+        operation_summary="Upload a single file.",
+        operation_description="Upload a single file using multipart/form-data.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['student_table'],
+            properties={
+                'student_table': openapi.Schema(
+                    type=openapi.TYPE_FILE,
+                    format=openapi.FORMAT_BINARY,  # Specify binary format
+                    description="The allowed extensions excel(xls,xlsx)."
+                )
+            }
+        ),
+        consumes=["multipart/form-data"],  # Set the content type
+        responses={
+            status.HTTP_201_CREATED: "File uploaded successfully.",
+            status.HTTP_400_BAD_REQUEST: "Bad request.",
+        }
+    )
+    @action(detail=False, methods=['POST'])
+    def add_student_with_excel(self, request):
+        uploaded_file = request.data.get('students_table')
 
+        if not uploaded_file:
+            return Response({"error": "No file was uploaded."}, status=status.HTTP_400_BAD_REQUEST)
+        allowed_extensions = ['.xls', '.xlsx']
+        file_name = uploaded_file.name
+        file_extension = file_name.split('.')[-1].lower()
+        print(any(file_extension == ext for ext in allowed_extensions))
+
+        if not any(file_extension == ext for ext in allowed_extensions):
+            return Response({"error": "Invalid file extension."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": "success"}, status=status.HTTP_200_OK)
+    
     def update(self, request, *args, **kwargs):
         serializer=global_update(self, request, *args, **kwargs,model=conf.STUDENT,types=models.FileField)
         return Response(serializer.data, status=status.HTTP_200_OK)
