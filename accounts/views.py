@@ -8,6 +8,10 @@ from django.db import models
 from rest_framework import status
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+from rest_framework.decorators import action
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
 
 # Create your views here.
 def global_update(self, request, *args, **kwargs):
@@ -59,6 +63,38 @@ class UserView(ModelViewSet):
     queryset=get_user_model().objects.all()
     serializer_class=serializers.UserSerializer
 
+
+    def create(self, request, *args, **kwargs):
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'username',  # parameter name
+                openapi.IN_QUERY,
+                description="Username to check",
+                type=openapi.TYPE_STRING,
+            ),
+        ]
+    )
+    @action(detail=False, methods=['GET'])
+    def check_username_exists(self, request):
+        username = request.query_params.get('username')
+        if not username:
+            return Response({"error": "Username parameter is missing."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if the username already exists in the database
+        user_exists = get_user_model().objects.filter(username=username).exists()
+
+        if user_exists:
+            return Response({"exists": True}, status=status.HTTP_200_OK)
+        else:
+            return Response({"exists": False}, status=status.HTTP_200_OK)
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
@@ -82,9 +118,11 @@ class Permission_View(ModelViewSet):
         self.perform_destroy(instance)
         return Response({"success":"true"},status=status.HTTP_200_OK)
 
-@receiver(post_delete, sender=conf.ADMIN)
+@receiver(post_delete)
 def delete_user(sender, instance, **kwargs):
-    instance.user.delete()
+    if hasattr(instance, 'user'):
+        instance.user.delete()
+
 class Admin_View(ModelViewSet):
     queryset=get_model(conf.ADMIN).objects.all()
     serializer_class=serializers.AdminSerializer
@@ -98,9 +136,6 @@ class Admin_View(ModelViewSet):
         self.perform_destroy(instance)
         return Response({"success":"true"},status=status.HTTP_200_OK)
 
-@receiver(post_delete, sender=conf.TEACHER)
-def delete_user(sender, instance, **kwargs):
-    instance.user.delete()
 class Teacher_View(ModelViewSet):
     queryset=get_model(conf.TEACHER).objects.all()
     serializer_class=serializers.TeacherSerializer
@@ -114,9 +149,6 @@ class Teacher_View(ModelViewSet):
         self.perform_destroy(instance)
         return Response({"success":"true"},status=status.HTTP_200_OK)
 
-@receiver(post_delete, sender=conf.EMPLOYER)
-def delete_user(sender, instance, **kwargs):
-    instance.user.delete()
 class Employer_View(ModelViewSet):
     queryset=get_model(conf.EMPLOYER).objects.all()
     serializer_class=serializers.EmployerSerializer
@@ -130,9 +162,6 @@ class Employer_View(ModelViewSet):
         self.perform_destroy(instance)
         return Response({"success":"true"},status=status.HTTP_200_OK)
 
-@receiver(post_delete, sender=conf.STUDENT)
-def delete_user(sender, instance, **kwargs):
-    instance.user.delete()
 class Student_View(ModelViewSet):
     queryset=get_model(conf.STUDENT).objects.all()
     serializer_class=serializers.StudentSerializer
@@ -146,9 +175,6 @@ class Student_View(ModelViewSet):
         self.perform_destroy(instance)
         return Response({"success":"true"},status=status.HTTP_200_OK)
 
-@receiver(post_delete, sender=conf.PARENT)
-def delete_user(sender, instance, **kwargs):
-    instance.user.delete()
 class Parent_View(ModelViewSet):
     queryset=get_model(conf.PARENT).objects.all()
     serializer_class=serializers.ParentSerializer

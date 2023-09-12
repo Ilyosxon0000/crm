@@ -24,10 +24,10 @@ SECRET_KEY = 'django-insecure-s0m@ij=z=e8n2x+obp#95ib4r5n@4*i29i9f(@cdzj+jdq6r1#
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-DEPLOY=False
+DEPLOY=True
 
 if DEPLOY:
-    ALLOWED_HOSTS = ['alxcrm.pythonanywhere.com']
+    ALLOWED_HOSTS = ['*']
 else:
     ALLOWED_HOSTS = []
 
@@ -181,39 +181,19 @@ REST_FRAMEWORK = {
 
 # CORS_ALLOWED_ORIGINS = [
 #     "http://localhost:3000",
-#     "http://localhost:3001",
-#     "http://localhost:3002",
-#     "http://localhost:3003",
-#     "http://localhost:3004",
-#     "http://localhost:3005",
-#     "http://localhost:9001",
-#     "http://localhost:9000",
-#     "http://localhost:9002",
-#     "http://localhost:9003",
-#     "http://localhost:9004",
-#     "http://localhost:9005",
-#     "http://localhost:5500",
 # ]
 
 CORS_ALLOW_ALL_ORIGINS=True
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
-        },
-    },
-}
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [("127.0.0.1", 6379)],
+#         },
+#     },
+# }
 
 # CRONJOBS = [
 #     ('0 0 1 * *', 'your_app_name.tasks.add_object_to_model_monthly'),
 # ]
-
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-# SECURE_SSL_REDIRECT = True
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
-
-# SSL_CERTIFICATE = "/home/ilyosxon/Asosiy/crm/crm/server.crt"
-# SSL_KEY = "/home/ilyosxon/Asosiy/crm/crm/private-key.pem"

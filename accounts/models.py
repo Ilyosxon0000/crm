@@ -11,8 +11,8 @@ class UserProfile(AbstractUser):
         formatted_date = current_date.strftime("%Y_%m_%d")
         return f"uploads/{instance.username}/avatar/{formatted_date}/{filename}"
     
-    image=models.FileField(upload_to=user_avatar_path,verbose_name="Avatar uchun surat:")
-    middle_name=models.CharField(max_length=255,verbose_name="Otasini ismi:")
+    image=models.FileField(upload_to=user_avatar_path,verbose_name="Avatar uchun surat:",blank=True,null=True)
+    middle_name=models.CharField(max_length=255,verbose_name="Otasini ismi:",blank=True,null=True)
     type_user = models.CharField(max_length=255, blank=True, null=True,verbose_name="User turi:")
 
     class Meta:

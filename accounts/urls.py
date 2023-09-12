@@ -6,7 +6,7 @@ from djoser.urls import authtoken
 
 
 router=DefaultRouter()
-router.register("user",views.UserView,basename="user")
+router.register("users",views.UserView,basename="user")
 router.register("types",views.Type_of_Admin_View,basename="types")
 router.register("permissions",views.Permission_View,basename="permissions")
 router.register("admins",views.Admin_View,basename="admins")
