@@ -51,3 +51,13 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model=get_model(conf.TASK)
         fields="__all__"
+
+class Parent_CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=get_model(conf.PARENT_COMMENT)
+        fields="__all__"
+
+class Teacher_LessonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=get_model(conf.TEACHER_LESSON)
+        fields="__all__"

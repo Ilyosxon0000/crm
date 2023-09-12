@@ -162,7 +162,7 @@ class Task(models.Model):
             raise ValidationError("from_user and to_user cannot be the same.")
         super().save(*args, **kwargs)
 
-class Parent_Comments(models.Model):
+class Parent_Comment(models.Model):
     parent=models.ForeignKey(get_model(conf.PARENT),related_name='parent_comments',on_delete=models.CASCADE)
     admin=models.ForeignKey(get_model(conf.ADMIN),related_name='admin_answers',on_delete=models.CASCADE)
     message=models.TextField()

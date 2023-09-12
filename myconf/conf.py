@@ -39,6 +39,8 @@ LESSON_TIME="school.Lesson_Time"#Dars soati modeli
 LESSON="school.Lesson"#Davomat modeli
 GRADE="school.Grade"#Davomat modeli
 TASK="school.Task"#Davomat modeli
+PARENT_COMMENT="school.Parent_Comment"#Davomat modeli
+TEACHER_LESSON="school.Teacher_Lesson"#Davomat modeli
 
 # finance app models
 FINANCE="finance.Finance"

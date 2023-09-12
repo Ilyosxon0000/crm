@@ -3,7 +3,7 @@ from . import views
 from school import urls as school_urls
 from finance import urls as finance_urls
 from djoser.urls import authtoken
-
+from django.urls import path
 
 router=DefaultRouter()
 router.register("users",views.UserView,basename="user")
@@ -14,7 +14,9 @@ router.register("teachers",views.Teacher_View,basename="teachers")
 router.register("employers",views.Employer_View,basename="employers")
 router.register("students",views.Student_View,basename="students")
 router.register("parents",views.Parent_View,basename="parents")
-urlpatterns = []
+urlpatterns = [
+    path("general_statistics/",views.General_Statistics.as_view())
+]
 urlpatterns+=router.urls
 urlpatterns += school_urls.router.urls
 urlpatterns += finance_urls.router.urls

@@ -130,3 +130,13 @@ class TaskView(ModelViewSet):
     queryset=get_model(conf.TASK).objects.all()
     serializer_class=serializers.TaskSerializer
     filterset_fields="__all__"
+
+class Parent_CommentView(ModelViewSet):
+    queryset=get_model(conf.PARENT_COMMENT).objects.all()
+    serializer_class=serializers.Parent_CommentSerializer
+    filterset_fields="__all__"
+
+class Teacher_LessonView(ModelViewSet):
+    queryset=get_model(conf.TEACHER_LESSON).objects.all()
+    serializer_class=serializers.Teacher_LessonSerializer
+

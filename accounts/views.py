@@ -11,7 +11,7 @@ from django.dispatch import receiver
 from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-
+from rest_framework.views import APIView
 
 # Create your views here.
 def global_update(self, request, *args, **kwargs):
@@ -188,3 +188,23 @@ class Parent_View(ModelViewSet):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response({"success":"true"},status=status.HTTP_200_OK)
+
+
+class StudentxlsView(APIView):
+    def get(self,request,*args,**kwargs):
+        return Response({"message":"FormData","student_table":"student_table.xls"},status=200)
+    
+    def post(self,request,*args,**kwargs):
+        return Response(request.data,status=200)
+
+
+class General_Statistics(APIView):
+    def get(self,request,*args,**kwargs):
+        data={
+            "admins":len(get_model(conf.ADMIN).objects.all()),
+            "teachers":len(get_model(conf.TEACHER).objects.all()),
+            "employers":len(get_model(conf.EMPLOYER).objects.all()),
+            "students":len(get_model(conf.STUDENT).objects.all()),
+        }
+        return Response(data,status=200)
+    

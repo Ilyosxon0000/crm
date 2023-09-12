@@ -10,5 +10,7 @@ router.register("lesson_times",views.Lesson_TimeView,basename="lesson_times")
 router.register("lessons",views.LessonView,basename="lessons")
 router.register("grades",views.GradeView,basename="grades")
 router.register("tasks",views.TaskView,basename="tasks")
+router.register("parent_comments",views.Parent_CommentView,basename="parent_comments")
+router.register("teacher_lessons",views.Teacher_LessonView,basename="teacher_lessons")
 
 urlpatterns = []+router.urls
