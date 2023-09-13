@@ -164,7 +164,7 @@ class Task(models.Model):
 
 class Parent_Comment(models.Model):
     parent=models.ForeignKey(get_model(conf.PARENT),related_name='parent_comments',on_delete=models.CASCADE)
-    admin=models.ForeignKey(get_model(conf.ADMIN),related_name='admin_answers',on_delete=models.CASCADE)
+    admin=models.ForeignKey(get_model(conf.ADMIN),blank=True,null=True,related_name='admin_answers',on_delete=models.CASCADE)
     message=models.TextField()
     created_date=models.DateTimeField(auto_now_add=True)
     change_date=models.DateTimeField(auto_now=True)

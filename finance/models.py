@@ -1,5 +1,6 @@
 from django.db import models
 from myconf import conf
+from django.db.models import F,ExpressionWrapper
 
 class Finance(models.Model):
     EXPONSE="EXPONSE"
@@ -45,7 +46,43 @@ class Finance(models.Model):
     class Meta:
         verbose_name_plural="Finance"
 
+class Student_PayManager(models.Manager):
+    def custom_create(self, *args,**kwargs):
+        sum=0
+        instance_tuple = self.get_or_create(*args,**kwargs,created_date__year=conf.get_date("year"),created_date__month=conf.get_date("month"))
+        instance=instance_tuple[0]
+        print(instance_tuple[1])
+        if instance_tuple[1]:
+            instance.balance=instance.cost
+            if instance.student.amount>0:
+                sum+=instance.student.amount
+                instance.balance=instance.cost+sum
+            instance.student.amount+=instance.balance
+            instance.save()
+            instance.student.save()
+        return instance
+    
+    def custom_update(self,instance,pay):
+        instance.balance += pay
+        instance.student.amount+=pay
+        instance.save()
+        instance.student.save()
 
+    def bug_fix(self,instance, new_value):
+        sum=0
+        instance.balance=instance.cost
+        if instance.student.amount>0:
+            sum+=instance.student.amount
+        if instance.tolovlar.exists():
+            all = instance.tolovlar.all()
+            for i in all:
+                sum += i.paid
+        instance.balance=instance.cost+sum
+        instance.student.amount=instance.balance
+        instance.save()
+        instance.student.save()
+        return instance
+    
 class Student_Pay(models.Model):
     PAID="PAID"
     NO_PAID="NO_PAID"#DID not paid
@@ -60,28 +97,16 @@ class Student_Pay(models.Model):
     created_date=models.DateTimeField(auto_now_add=True)
     change_date=models.DateTimeField(auto_now=True)
 
+    objects = Student_PayManager()
+
     def __str__(self):
         return f"username:{self.student.user.username};status:{self.status};summa:{self.balance};date:{self.change_date.month};"
 
     def save(self, *args, **kwargs):
-        # self.balance=self.cost
-        super().save(*args, **kwargs)
-        sum = 0
-        if self.student.amount>0:
-            sum+=0
-        if self.tolovlar.exists():
-            all = self.tolovlar.all()
-            for i in all:
-                sum += i.paid
-        self.balance=sum + self.cost
         if self.balance>=0:
             self.status=self.PAID
-        if self.student.amount>0:
-            self.student.amount = self.balance
-        if self.student.amount<0 and self.student.latest_amount_date.year==conf.get_date('year') and self.student.latest_amount_date.month==conf.get_date('month'):
-            self.student.amount += self.balance
-            self.student.latest_amount_date=conf.get_date('current')
-        self.student.save()
+        else:
+            self.status=self.NO_PAID
         super().save(*args, **kwargs)
     class Meta:
         verbose_name_plural="O'quvchi To'lovlari"
@@ -92,26 +117,15 @@ class Each_Pay(models.Model):
 
     def __str__(self) -> str:
         return f'{self.std_pay.student.user.username} - {self.paid} som'
-    
-    # def save(self, *args, **kwargs):
-    #     super(Each_Pay, self).save(*args, **kwargs)
-    #     Finance.objects.create(
-    #         student=self.std_pay.student,
-    #         amount=self.paid,
-    #         types_finance=Finance.INCOME,
-    #         types=Finance.STUDENT_PAY
-    #     )
-    #     self.std_pay.save()
-    def save(self, *args, **kwargs):
-        super(Each_Pay, self).save(*args, **kwargs)  # Save the instance to get a primary key
 
-        # Now that the instance is saved, you can create the related Finance object.
+    def save(self, *args, **kwargs):
+        super(Each_Pay, self).save(*args, **kwargs)
         Finance.objects.create(
             student=self.std_pay.student,
             amount=self.paid,
             types_finance=Finance.INCOME,
             types=Finance.STUDENT_PAY
         )
-
+        Student_Pay.objects.custom_update(self.std_pay,self.paid)
         # Update the related Student_Pay instance and save it.
         self.std_pay.save()

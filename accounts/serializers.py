@@ -2,7 +2,6 @@ from rest_framework import serializers
 from myconf.conf import get_model
 from myconf import conf
 from django.contrib.auth import get_user_model
-from school.serializers import ScienceSerializer
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(required=False, style={"input_type": "password"},write_only=True)
@@ -89,6 +88,7 @@ class TeacherSerializer(serializers.ModelSerializer):
         return teacher
     
     def get_sciences_dict(self, obj):
+        from school.serializers import ScienceSerializer
         request = self.context.get('request')
         serializer_context = {'request': request }
         sciences = obj.sciences.all()

@@ -183,9 +183,9 @@ class Student_View(ModelViewSet):
         operation_description="Upload a single file using multipart/form-data.",
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
-            required=['student_table'],
+            required=['students_table'],
             properties={
-                'student_table': openapi.Schema(
+                'students_table': openapi.Schema(
                     type=openapi.TYPE_FILE,
                     format=openapi.FORMAT_BINARY,  # Specify binary format
                     description="The allowed extensions excel(xls,xlsx)."
@@ -201,13 +201,13 @@ class Student_View(ModelViewSet):
     @action(detail=False, methods=['POST'])
     def add_student_with_excel(self, request):
         uploaded_file = request.data.get('students_table')
+        print(uploaded_file)
 
         if not uploaded_file:
             return Response({"error": "No file was uploaded."}, status=status.HTTP_400_BAD_REQUEST)
-        allowed_extensions = ['.xls', '.xlsx']
+        allowed_extensions = ['xls', 'xlsx']
         file_name = uploaded_file.name
         file_extension = file_name.split('.')[-1].lower()
-        print(any(file_extension == ext for ext in allowed_extensions))
 
         if not any(file_extension == ext for ext in allowed_extensions):
             return Response({"error": "Invalid file extension."}, status=status.HTTP_400_BAD_REQUEST)

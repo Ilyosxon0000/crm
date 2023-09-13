@@ -4,9 +4,11 @@ from rest_framework.viewsets import ModelViewSet
 from . import serializers
 from rest_framework.response import Response
 from django.db.models import Q
-
+from rest_framework.decorators import action
+from django.db.models import Count
 # Create your views here.
 import datetime
+from accounts import serializers as acserializers
 
 def get_all_weeks_of_current_year():
     current_year = datetime.datetime.now().year
@@ -135,6 +137,22 @@ class Parent_CommentView(ModelViewSet):
     queryset=get_model(conf.PARENT_COMMENT).objects.all()
     serializer_class=serializers.Parent_CommentSerializer
     filterset_fields="__all__"
+
+    @action(detail=False, methods=['GET'])
+    def get_with_parent(self, request):
+        # queryset = self.filter_queryset(self.get_queryset())
+        parents=get_model(conf.PARENT).objects.all()
+        data=[]
+        for parent in parents:
+            if parent.parent_comments.exists():
+                pser=acserializers.ParentSerializer(parent,many=False)
+                msgser=serializers.Parent_CommentSerializer(parent.parent_comments,many=True)
+                data.append({
+                    "parent":pser.data,
+                    "messages":msgser.data
+                })
+        return Response(data)
+
 
 class Teacher_LessonView(ModelViewSet):
     queryset=get_model(conf.TEACHER_LESSON).objects.all()
