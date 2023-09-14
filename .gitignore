@@ -1,6 +1,2 @@
 venv
-main.py
-data.json
-script.js
-password_validation.txt
-username_validation.txt
+assets
