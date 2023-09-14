@@ -260,4 +260,4 @@ class Parent(models.Model):
         super().save(*args, **kwargs)
 
     class Meta:
-        verbose_name_plural="Otan ona"
+        verbose_name_plural="Ota ona"

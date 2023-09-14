@@ -12,32 +12,32 @@ class Student_PayManager(models.Manager):
             if instance.student.amount>0:
                 sum+=instance.student.amount
                 instance.balance=instance.cost+sum
-            instance.student.amount=instance.balance
+                instance.student.amount=instance.balance
+            else:
+                instance.student.amount+=instance.balance
             instance.save()
             instance.student.save()
         return instance
     
     def custom_update(self,student,pay):
-        sum=0
         costs=self.filter(student=student,status=Student_Pay.NO_PAID)
         student.amount+=pay
+        student.save()
         for cost in costs:
-            if pay>=cost.balance:
+            if pay>=abs(cost.balance):
                 pay+=cost.balance
+                cost.balance=0
                 cost.save()
             elif pay>0:
                 cost.balance+=pay
+                cost.save()
                 pay=0
-                cost.save()
-            sum+=cost.balance
-        if pay>sum:
-            for cost in costs:
-                cost.balance=0
-                cost.save()
-        # instance.balance += pay
-        # instance.student.amount+=pay
-        # instance.save()
-        # instance.student.save()
+        print(pay)
+        print(self.last().created_date)
+        self.last().balance+=pay
+        print(self.last().balance)
+        self.last().save()
+        # print(self.latest(field_name="created_date"))
 
     def bug_fix(self,instance, new_value):
         sum=0
@@ -71,7 +71,7 @@ class Student_Pay(models.Model):
     objects = Student_PayManager()
 
     def __str__(self):
-        return f"username:{self.student.user.username};status:{self.status};summa:{self.balance};date:{self.change_date.month};"
+        return f"username:{self.student.user.username};status:{self.status};summa:{self.balance};date:{self.created_date.month};"
 
     def save(self, *args, **kwargs):
         if self.balance>=0:
@@ -83,25 +83,24 @@ class Student_Pay(models.Model):
         verbose_name_plural="O'quvchi To'lovlari"
 
 class Each_Pay(models.Model):
-    std_pay = models.ForeignKey(Student_Pay, related_name='tolovlar', on_delete=models.CASCADE)
+    student=models.ForeignKey(conf.STUDENT,related_name='each_pays',on_delete=models.CASCADE)
     paid = models.IntegerField()
+    created_date=models.DateTimeField(auto_now_add=True)
+    change_date=models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return f'{self.std_pay.student.user.username} - {self.paid} som'
+        return f'{self.student.user.username} - {self.paid} som'
 
     def save(self, *args, **kwargs):
         super(Each_Pay, self).save(*args, **kwargs)
         Finance.objects.create(
-            student=self.std_pay.student,
+            student=self.student,
             each_pay=self,
             amount=self.paid,
             types_finance=Finance.INCOME,
             types=Finance.STUDENT_PAY
         )
-        Student_Pay.objects.custom_update(self.std_pay.student,self.paid)
-        # Update the related Student_Pay instance and save it.
-        self.std_pay.save()
-
+        Student_Pay.objects.custom_update(self.student,self.paid)
 
 class Finance(models.Model):
     EXPONSE="EXPONSE"
