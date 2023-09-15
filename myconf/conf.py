@@ -45,6 +45,7 @@ TEACHER_LESSON="school.Teacher_Lesson"#Davomat modeli
 # finance app models
 FINANCE="finance.Finance"
 STUDENT_PAY="finance.Student_Pay"
+EACH_PAY="finance.Each_pay"
 
 def all_days():
     import datetime

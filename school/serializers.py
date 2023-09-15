@@ -85,6 +85,14 @@ class Parent_CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model=get_model(conf.PARENT_COMMENT)
         fields="__all__"
+    
+    def to_representation(self, instance):
+        objs = super(Parent_CommentSerializer, self).to_representation(instance)
+        print(objs['admin'])
+        objs['type'] = "question"
+        if objs['admin']:
+            objs['type'] = "answer"
+        return objs
 
 class Teacher_LessonSerializer(serializers.ModelSerializer):
     class Meta:

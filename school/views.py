@@ -149,7 +149,15 @@ class Parent_CommentView(ModelViewSet):
                 msgser=serializers.Parent_CommentSerializer(parent.parent_comments,many=True)
                 data.append({
                     "parent":pser.data,
-                    "messages":msgser.data
+                    "messages":msgser.data,
+                    "chat":True
+                })
+            else:
+                pser=acserializers.ParentSerializer(parent,many=False)
+                data.append({
+                    "parent":pser.data,
+                    "messages":[],
+                    "chat":False
                 })
         return Response(data)
 

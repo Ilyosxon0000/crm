@@ -253,5 +253,5 @@ class General_Statistics(APIView):
             "employers":len(get_model(conf.EMPLOYER).objects.all()),
             "students":len(get_model(conf.STUDENT).objects.all()),
         }
-        return Response(data,status=200)
+        return Response([data],status=200)
     

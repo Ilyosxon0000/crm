@@ -34,9 +34,13 @@ class Student_PayManager(models.Manager):
                 pay=0
         print(pay)
         print(self.last().created_date)
-        self.last().balance+=pay
-        print(self.last().balance)
-        self.last().save()
+        last_object = self.last()
+        if last_object:
+            last_object.balance+=pay
+            last_object.save()
+        # self.last().balance+=pay
+        # print(self.last().balance)
+        # self.last().save()
         # print(self.latest(field_name="created_date"))
 
     def bug_fix(self,instance, new_value):
@@ -71,7 +75,7 @@ class Student_Pay(models.Model):
     objects = Student_PayManager()
 
     def __str__(self):
-        return f"username:{self.student.user.username};status:{self.status};summa:{self.balance};date:{self.created_date.month};"
+        return f"username:{self.student.user.username};status:{self.status};summa:{self.balance};"#
 
     def save(self, *args, **kwargs):
         if self.balance>=0:
@@ -126,7 +130,7 @@ class Finance(models.Model):
     types_finance=models.CharField(max_length=60,choices=STATUS,verbose_name="Chiqim yoki Kirim turi:")
     types=models.CharField(max_length=60,choices=STATUS_FINANCE,blank=True,null=True,verbose_name="(Chiqim,Kirim) turi:")
     comment=models.TextField(blank=True,null=True,verbose_name="Chiqim sababi:")
-    date=models.DateTimeField(auto_now_add=True)
+    date=models.DateTimeField(blank=True,null=True)
     update_date=models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):

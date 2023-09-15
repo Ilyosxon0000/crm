@@ -220,7 +220,6 @@ class Student(models.Model):
     user = models.OneToOneField(get_user_model(), related_name='student', on_delete=models.CASCADE)
     id_card = models.CharField(max_length=50)
     date_of_admission = models.DateField(blank=True, null=True)
-    class_of_student = models.IntegerField(default=0,blank=True, null=True)
     class_of_school = models.ForeignKey(conf.CLASS, related_name='students', on_delete=models.CASCADE, blank=True, null=True)
     id_card_parents = models.FileField(upload_to=student_id_card_parents_path, null=True, blank=True,verbose_name="Ota-ona pasporti nusxasi:")
     picture_3x4 = models.FileField(upload_to=student_picture_3x4_path, null=True, blank=True,verbose_name="3x4 rasm:")

@@ -7,9 +7,20 @@ class FinanceSerializer(serializers.ModelSerializer):
         model=get_model(conf.FINANCE)
         fields="__all__"
 
+    def to_representation(self, instance):
+        objs = super(FinanceSerializer, self).to_representation(instance)
+        objs['month'] = 2023
+        # print(objs,'\n')
+        return objs
+
 class Student_PaySerializer(serializers.ModelSerializer):
     class Meta:
         model=get_model(conf.STUDENT_PAY)
+        fields="__all__"
+
+class Each_paySerializer(serializers.ModelSerializer):
+    class Meta:
+        model=get_model(conf.EACH_PAY)
         fields="__all__"
 
 class DaySerializer(serializers.Serializer):

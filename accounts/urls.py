@@ -8,6 +8,7 @@ from finance.models import Student_Pay
 from myconf.conf import get_model
 from myconf import conf
 from django.http.response import JsonResponse
+from finance.views import FinanceView
 
 
 router=DefaultRouter()
@@ -26,6 +27,7 @@ def salom(req):
     return JsonResponse({"salom":"salom"})
 urlpatterns = [
     path("salom/",salom),
+    path("finances/",FinanceView.as_view()),
     path("general_statistics/",views.General_Statistics.as_view())
 ]
 urlpatterns+=router.urls
