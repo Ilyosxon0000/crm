@@ -32,16 +32,10 @@ class Student_PayManager(models.Manager):
                 cost.balance+=pay
                 cost.save()
                 pay=0
-        print(pay)
-        print(self.last().created_date)
         last_object = self.last()
         if last_object:
             last_object.balance+=pay
             last_object.save()
-        # self.last().balance+=pay
-        # print(self.last().balance)
-        # self.last().save()
-        # print(self.latest(field_name="created_date"))
 
     def bug_fix(self,instance, new_value):
         sum=0
@@ -101,8 +95,8 @@ class Each_Pay(models.Model):
             student=self.student,
             each_pay=self,
             amount=self.paid,
-            types_finance=Finance.INCOME,
-            types=Finance.STUDENT_PAY
+            types_finance="INCOME",
+            types="STUDENT_PAY"
         )
         Student_Pay.objects.custom_update(self.student,self.paid)
 
@@ -122,7 +116,7 @@ class Finance(models.Model):
         (OTHER,"boshqa"),
     )
     student=models.ForeignKey(conf.STUDENT,related_name='finance_pays',on_delete=models.CASCADE,blank=True,null=True)
-    each_pay=models.ForeignKey(Each_Pay,related_name='finance_pays',on_delete=models.CASCADE)
+    each_pay=models.ForeignKey(Each_Pay,related_name='finance_pays',on_delete=models.CASCADE,blank=True,null=True)
     teacher=models.ForeignKey(conf.TEACHER,related_name='salaries',on_delete=models.CASCADE,blank=True,null=True)
     employer=models.ForeignKey(conf.EMPLOYER,related_name='salaries',on_delete=models.CASCADE,blank=True,null=True)
     admin=models.ForeignKey(conf.ADMIN,related_name='salaries',on_delete=models.CASCADE,blank=True,null=True)
@@ -151,7 +145,6 @@ class Finance(models.Model):
             return self.date.weekday
         elif types=="day":
             return self.date.day
-    
-    
+
     class Meta:
         verbose_name_plural="Finance"
