@@ -27,7 +27,7 @@ def salom(req):
     return JsonResponse({"salom":"salom"})
 urlpatterns = [
     path("salom/",salom),
-    path("finances/",FinanceView.as_view()),
+    # path("finances/",FinanceView.as_view()),
     path("general_statistics/",views.General_Statistics.as_view())
 ]
 urlpatterns+=router.urls
