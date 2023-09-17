@@ -107,7 +107,7 @@ class Finance(models.Model):
         (EXPONSE,"Chiqim"),
         (INCOME,"Kirim"),
     )
-    user=models.ForeignKey(get_user_model(),related_name='finances',on_delete=models.CASCADE)
+    user=models.ForeignKey(get_user_model(),related_name='finances',blank=True,null=True,on_delete=models.CASCADE)
     amount=models.IntegerField(default=0,verbose_name="pul miqdori:")
     types_finance=models.CharField(max_length=60,choices=STATUS,verbose_name="Chiqim yoki Kirim:")
     each_pay=models.ForeignKey(Each_Pay,related_name='finance_pays',on_delete=models.CASCADE,blank=True,null=True)
