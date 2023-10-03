@@ -285,6 +285,7 @@ class Student_PayView(ModelViewSet):
 class Each_payView(ModelViewSet):
     queryset = get_model(conf.EACH_PAY).objects.all()
     serializer_class = serializers.Each_paySerializer
+    filterset_fields="__all__"
 
 # import calendar
 # from itertools import chain

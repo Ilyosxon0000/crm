@@ -1,0 +1,65 @@
+{
+	"info": {
+		"_postman_id": "1021ae02-b3ab-4e8e-9091-31f0a03e690a",
+		"name": "CRM Endpoints",
+		"description": "CRM project API documentation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28789712",
+		"_collection_link": "https://restless-equinox-630744.postman.co/workspace/My-Workspace~bd66954c-b020-420f-83b5-e0679280cf70/collection/28789712-1021ae02-b3ab-4e8e-9091-31f0a03e690a?action=share&source=collection_link&creator=28789712"
+	},
+	"item": [
+		{
+			"name": "Add student with excel",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "students_table",
+							"description": "Allowed(.xls, .xlsx)",
+							"type": "file",
+							"src": []
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/students/add_student_with_excel/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"students",
+						"add_student_with_excel",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Student pay post",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"paid\": 0,\n  \"student\": 0\n}"
+				},
+				"url": {
+					"raw": "{{base_url}}/each_pay/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"each_pay",
+						""
+					]
+				},
+				"description": "Form data yoki json data"
+			},
+			"response": []
+		}
+	]
+}

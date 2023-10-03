@@ -255,3 +255,4 @@ class General_Statistics(APIView):
         }
         return Response([data],status=200)
     
+
