@@ -81,7 +81,7 @@ class TaskSerializer(serializers.ModelSerializer):
         serializer = serializers.UserSerializer(user, many=False, context=serializer_context)
         return serializer.data
     
-    def get_from_user_dict(self, obj):
+    def get_to_user_dict(self, obj):
         from accounts import serializers
         request = self.context.get('request')
         serializer_context = {'request': request }
