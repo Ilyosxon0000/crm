@@ -20,13 +20,13 @@ router.register("teachers",views.Teacher_View,basename="teachers")
 router.register("employers",views.Employer_View,basename="employers")
 router.register("students",views.Student_View,basename="students")
 router.register("parents",views.Parent_View,basename="parents")
-# def salom(req):
-#     students=get_model(conf.STUDENT).objects.all()
-#     for student in students:
-#         Student_Pay.objects.custom_create(student=student,cost=-100)
-#     return JsonResponse({"salom":"salom"})
+def salom(req):
+    students=get_model(conf.STUDENT).objects.all()
+    for student in students:
+        Student_Pay.objects.custom_create(student=student,cost=-100)
+    return JsonResponse({"salom":"salom"})
 urlpatterns = [
-    # path("salom/",salom),
+    path("salom/",salom),
     # path("finances/",FinanceView.as_view()),
     path("general_statistics/",views.General_Statistics.as_view())
 ]

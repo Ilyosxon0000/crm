@@ -1,14 +1,21 @@
+# my config import
+from accounts import serializers as acserializers
 from myconf.conf import get_model
 from myconf import conf
-from rest_framework.viewsets import ModelViewSet
 from . import serializers
-from rest_framework.response import Response
+# django import
 from django.db.models import Q
-from rest_framework.decorators import action
 from django.db.models import Count
-# Create your views here.
+# rest framework import
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.decorators import action
+# datetime import
 import datetime
-from accounts import serializers as acserializers
+# swagger conf
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 
 def get_all_weeks_of_current_year():
     current_year = datetime.datetime.now().year
@@ -32,19 +39,6 @@ class ClassView(ModelViewSet):
 class AttendanceView(ModelViewSet):
     queryset=get_model(conf.ATTENDANCE).objects.all()
     serializer_class=serializers.AttendanceSerializer
-    def get_queryset(self):
-        queryset = self.queryset
-        type_user = self.request.GET.get('type')
-        type_list = ["tasischi", "manager", "finance", "admin", "employer"]
-        if type_user and type_user in type_list:
-            q_objects = [Q(user__type_user=i) for i in type_list]
-            combined_q_object = q_objects.pop()
-            for q_obj in q_objects:
-                combined_q_object |= q_obj
-            queryset = queryset.filter(combined_q_object)
-        elif type_user:
-            queryset = queryset.filter(user__type_user=type_user)
-        return queryset
 
 class RoomView(ModelViewSet):
     queryset=get_model(conf.ROOM).objects.all()
@@ -86,6 +80,40 @@ class LessonView(ModelViewSet):
         "FRIDAY": 4,
         "SATURDAY": 5,
     }
+    @swagger_auto_schema(
+    operation_summary="Upload a single file.",
+    operation_description="Upload a single file using multipart/form-data.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        required=['lessons_table'],
+        properties={
+            'lessons_table': openapi.Schema(
+                type=openapi.TYPE_FILE,
+                format=openapi.FORMAT_BINARY,  # Specify binary format
+                description="The allowed extensions excel(xls,xlsx)."
+            )
+        }
+    ),
+    consumes=["multipart/form-data"],  # Set the content type
+    responses={
+        status.HTTP_201_CREATED: "File uploaded successfully.",
+        status.HTTP_400_BAD_REQUEST: "Bad request.",
+    }
+    )
+    @action(detail=False, methods=['POST'])
+    def add_lesson_with_excel(self, request):
+        uploaded_file = request.data.get('lessons_table')
+        print(uploaded_file)
+
+        if not uploaded_file:
+            return Response({"error": "No file was uploaded."}, status=status.HTTP_400_BAD_REQUEST)
+        allowed_extensions = ['xls', 'xlsx']
+        file_name = uploaded_file.name
+        file_extension = file_name.split('.')[-1].lower()
+
+        if not any(file_extension == ext for ext in allowed_extensions):
+            return Response({"error": "Invalid file extension."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"message": "success"}, status=status.HTTP_200_OK)
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())

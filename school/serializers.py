@@ -24,9 +24,17 @@ class ClassSerializer(serializers.ModelSerializer):
 
 
 class AttendanceSerializer(serializers.ModelSerializer):
+    user_object=serializers.SerializerMethodField('get_user_dict')
     class Meta:
         model=get_model(conf.ATTENDANCE)
         fields="__all__"
+    def get_user_dict(self, obj):
+        from accounts import serializers
+        request = self.context.get('request')
+        serializer_context = {'request': request }
+        user = obj.user
+        serializer = serializers.UserSerializer(user, many=False, context=serializer_context)
+        return serializer.data
 
 class RoomSerializer(serializers.ModelSerializer):
     class Meta:

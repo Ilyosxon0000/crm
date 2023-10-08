@@ -23,7 +23,7 @@ class Science(models.Model):
 class Class(models.Model):
     title=models.CharField(max_length=255)
     slug=models.SlugField(blank=True,null=True)
-    teacher=models.ForeignKey(conf.TEACHER,related_name='sinflar',on_delete=models.CASCADE)
+    teacher=models.ForeignKey(conf.TEACHER,related_name='sinflar',on_delete=models.CASCADE,blank=True,null=True)
     
     def __str__(self):
         return f"class:{self.title}"
@@ -104,11 +104,11 @@ class Lesson(models.Model):
     teacher=models.ForeignKey(conf.TEACHER,related_name='lessons',on_delete=models.CASCADE)
     science=models.ForeignKey(conf.SCIENCE,related_name="lessons",on_delete=models.CASCADE)
     student_class=models.ForeignKey(conf.CLASS,related_name='lessons',on_delete=models.CASCADE)
-    room=models.ForeignKey(conf.ROOM,related_name='lessons',on_delete=models.CASCADE)
+    room=models.ForeignKey(conf.ROOM,related_name='lessons',blank=True,null=True,on_delete=models.CASCADE)
     lesson_date=models.CharField(
         max_length=10,
         choices=DAY_CHOICES,
-        default='monday'  # You can set a default value if needed
+        default='Dushanba'
     )
     lesson_time=models.ForeignKey(Lesson_Time,related_name="lessons",on_delete=models.CASCADE)
 

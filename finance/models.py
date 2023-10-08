@@ -65,7 +65,7 @@ class Student_PayManager(models.Manager):
         return instance
     
 class Student_Pay(models.Model):
-    PAID="PAID"
+    PAID="PAID" 
     NO_PAID="NO_PAID"#DID not paid
     STATUS=(
         (PAID,"to'lagan"),

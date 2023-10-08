@@ -18,5 +18,5 @@ def students_pays(request):
     if request.method == 'GET':
         students=get_model(conf.STUDENT).objects.all()
         for student in students:
-            student_pay=get_model(conf.STUDENT_PAY).objects.custom_create(student=student,amount_2=money)
+            student_pay=get_model(conf.STUDENT_PAY).objects.custom_create(student=student,cost=-100)
         return Response({"message": "succesfully"})

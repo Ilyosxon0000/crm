@@ -12,10 +12,12 @@ from rest_framework.decorators import action
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.views import APIView
+from django.db.models import Q
 from django.db.models import Count
 
 # Create your views here.
 def global_update(self, request, *args, **kwargs):
+    # print(request.data)
     queryset = self.filter_queryset(self.get_queryset())
     instance = self.get_object()
     data = request.data
@@ -42,6 +44,7 @@ def global_update(self, request, *args, **kwargs):
     user_serializer = serializers.UserSerializer(instance=instance.user, data=user_data, partial=True)
     user_serializer.is_valid(raise_exception=True)
     user_serializer.update(instance.user,user_data)
+
     model=kwargs['model']
     types=kwargs['types']
     file_fields = get_type_name_field(model,types)
@@ -53,11 +56,11 @@ def global_update(self, request, *args, **kwargs):
                 del_key.append(key)
     for item in del_key:
         my_dict.pop(item)
-    many_to_many_fields = get_type_name_field(model,models.ManyToManyField)
-    for i in many_to_many_fields:
-        items=dict(request.data).get(i,False)
-        items=[eval(i) for i in items]
-        my_dict[i]=items
+
+    permissions=dict(request.data).get("permissions",False)
+    permissions=[eval(i) for i in permissions]
+    my_dict["permissions"]=permissions
+    
     serializer = self.get_serializer(instance, data=my_dict, partial=True)
     serializer.is_valid(raise_exception=True)
     self.perform_update(serializer)
@@ -146,6 +149,7 @@ class Teacher_View(ModelViewSet):
     @action(detail=False, methods=['GET'])
     def teachers_for_class(self, request):
         queryset = self.filter_queryset(self.get_queryset())
+        
         teachers_with_classes = queryset.annotate(num_classes=Count('sinflar'))
         for teacher in teachers_with_classes:
             if teacher.num_classes == 0:
