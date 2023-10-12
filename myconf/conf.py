@@ -1,5 +1,6 @@
 import datetime
 from django.apps import apps
+from django.contrib.auth import get_user_model
 
 def get_model(Model):
     model_class = apps.get_model(Model, require_ready=False)
@@ -41,12 +42,6 @@ GRADE="school.Grade"#Davomat modeli
 TASK="school.Task"#Davomat modeli
 PARENT_COMMENT="school.Parent_Comment"#Davomat modeli
 TEACHER_LESSON="school.Teacher_Lesson"#Davomat modeli
-
-# finance app models
-FINANCE="finance.Finance"
-EXPENSE="finance.Expense"
-STUDENT_PAY="finance.Student_Pay"
-EACH_PAY="finance.Each_pay"
 
 def all_days():
     import datetime

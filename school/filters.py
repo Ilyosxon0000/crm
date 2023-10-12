@@ -5,4 +5,4 @@ from django_filters.rest_framework import filterset
 class AttendanceFilter(filterset.FilterSet):
     class Meta:
         model = get_model(conf.ATTENDANCE)
-        fields = ["user.type_user","davomat",'date']
+        fields = ["user","user__type_user",'date']

@@ -1,3 +1,4 @@
+import random
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 import datetime
@@ -14,6 +15,21 @@ class UserProfile(AbstractUser):
     image=models.FileField(upload_to=user_avatar_path,verbose_name="Avatar uchun surat:",blank=True,null=True)
     middle_name=models.CharField(max_length=255,verbose_name="Otasini ismi:",blank=True,null=True)
     type_user = models.CharField(max_length=255, blank=True, null=True,verbose_name="User turi:")
+    unique_number = models.PositiveIntegerField(unique=True)
+    # Other fields here
+
+    def save(self, *args, **kwargs):
+        if not self.unique_number:
+            i=0
+            while True:
+                new_unique_number = random.randint(100000, 999999)  # Generate a random 6-digit number
+                if not UserProfile.objects.filter(unique_number=new_unique_number).exists():
+                    self.unique_number = new_unique_number
+                    break
+                i+=1
+            print(i,"Random i")
+        super(UserProfile, self).save(*args, **kwargs)
+    # TODO GENERATE 6 Numbers Random
 
     class Meta:
         verbose_name_plural="Foydalanuvchilar"
@@ -99,6 +115,11 @@ class Teacher(models.Model):
         current_date = datetime.datetime.now()
         formatted_date = current_date.strftime("%Y_%m_%d")
         return f"uploads/teachers/{instance.user.username}/picture_3x4/{formatted_date}/{filename}"
+    
+    def lessons_file_path(instance, filename):
+        current_date = datetime.datetime.now()
+        formatted_date = current_date.strftime("%Y_%m_%d")
+        return f"uploads/teachers/{instance.user.username}/lessons_file/{formatted_date}/{filename}"
 
     FIXED = "FIXED"
     PER_HOURS = "PER_HOURS"
@@ -153,6 +174,7 @@ class Teacher(models.Model):
     biography = models.FileField(upload_to=teacher_biography_path, blank=True, null=True,verbose_name="Tarjimai xol:")
     medical_book = models.FileField(upload_to=teacher_medical_book_path, blank=True, null=True,verbose_name="Tibbiy Daftarcha (086):")
     picture_3x4 = models.FileField(upload_to=teacher_picture_3x4_path, null=True, blank=True,verbose_name="3x4 rasm:")
+    completed_salary=models.BooleanField(default=False)
 
     @property
     def oylik(self,soat):
@@ -260,3 +282,21 @@ class Parent(models.Model):
 
     class Meta:
         verbose_name_plural="Ota ona"
+
+    # user = models.OneToOneField(get_user_model(), related_name='teacher', on_delete=models.CASCADE)
+    # sciences = models.ManyToManyField('school.Science', related_name="teachers",blank=True,verbose_name="Fanlar:")
+    # id_card = models.CharField(max_length=50, blank=True, null=True,verbose_name="Pasport seriya raqami:")
+    # salary_type = models.CharField(max_length=255, choices=SALARY_TYPE,verbose_name="Oylik turi(Fixed yoki Soatbay):")
+    # salary = models.IntegerField(default=0,verbose_name="Oylik maosh(soatbay narx):")
+    # date_of_employment = models.DateField(blank=True, null=True,verbose_name="Ishga kirgan sanasi:")
+    # gender = models.CharField(max_length=255, choices=GENDER,verbose_name="Jinsi:")
+    # address = models.CharField(max_length=400, blank=True, null=True,verbose_name="Manzili:")
+    # experience = models.CharField(max_length=255,blank=True,null=True, choices=EXPERIENCE_TYPE,verbose_name="Tajriba:")
+    # language_certificate_file = models.FileField(upload_to=teacher_language_certificate_path, blank=True, null=True,verbose_name="Til sertifikati fayl shakli:")
+    # lens = models.FileField(upload_to=teacher_lens_path, blank=True, null=True,verbose_name="Obyektivka:")
+    # id_card_photo = models.FileField(upload_to=teacher_id_card_photo_path, blank=True, null=True,verbose_name="Pasport nusxasi:")
+    # survey = models.FileField(upload_to=teacher_survey_path, blank=True, null=True,verbose_name="So'rovnoma:")
+    # biography = models.FileField(upload_to=teacher_biography_path, blank=True, null=True,verbose_name="Tarjimai xol:")
+    # medical_book = models.FileField(upload_to=teacher_medical_book_path, blank=True, null=True,verbose_name="Tibbiy Daftarcha (086):")
+    # picture_3x4 = models.FileField(upload_to=teacher_picture_3x4_path, null=True, blank=True,verbose_name="3x4 rasm:")
+    # lessons_file=models.FileField(upload_to=lessons_file_path, null=True, blank=True,verbose_name="dars jadvali:")

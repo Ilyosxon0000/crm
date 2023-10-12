@@ -128,7 +128,6 @@ class ParentSerializer(serializers.ModelSerializer):
     user=UserSerializer()
     children_dict=serializers.SerializerMethodField('get_children_dict')
 
-
     class Meta:
         model=get_model(conf.PARENT)
         fields="__all__"

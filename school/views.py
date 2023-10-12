@@ -2,10 +2,9 @@
 from accounts import serializers as acserializers
 from myconf.conf import get_model
 from myconf import conf
+from school.filters import AttendanceFilter
+from school.table_with_xlsx import AddLessonWithExcel
 from . import serializers
-# django import
-from django.db.models import Q
-from django.db.models import Count
 # rest framework import
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
@@ -16,38 +15,105 @@ import datetime
 # swagger conf
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+# django import
+from django.db.models import Count
+from django.core.files.storage import FileSystemStorage
+from django.db import transaction
 
 def get_all_weeks_of_current_year():
     current_year = datetime.datetime.now().year
     all_weeks = set()
-
     for day in range(1, 366):  # Iterate through all days of the year
         current_date = datetime.date(current_year, 1, 1) + datetime.timedelta(days=day - 1)
         iso_week = current_date.isocalendar()[1]
         all_weeks.add(iso_week)
-
     return sorted(list(all_weeks))
 
 class ScienceView(ModelViewSet):
     queryset=get_model(conf.SCIENCE).objects.all()
     serializer_class=serializers.ScienceSerializer
+    lookup_field = 'pk'
+
+    @action(detail=True, methods=['GET'])
+    def get_teachers_of_sciences(self, request, pk=None):
+        from accounts.serializers import TeacherSerializer
+        instance = self.get_object()
+        teachers=get_model(conf.TEACHER).objects.filter(sciences=instance)
+        serializer=TeacherSerializer(teachers,many=True)
+        return Response(serializer.data)
 
 class ClassView(ModelViewSet):
     queryset=get_model(conf.CLASS).objects.all()
     serializer_class=serializers.ClassSerializer
+    lookup_field = 'pk'
+
+    @action(detail=False, methods=['GET'])
+    def get_students_of_classes(self, request,):
+        from accounts.serializers import StudentSerializer
+        queryset = self.filter_queryset(self.get_queryset())
+        data=[]
+        for instance in queryset:
+            students=get_model(conf.STUDENT).objects.filter(class_of_school=instance)
+            stdserializer=StudentSerializer(students,many=True)
+            serializer=self.get_serializer(instance,many=False)
+            class_data=serializer.data
+            class_data["students"]=stdserializer.data
+            data.append(class_data)
+        return Response(data)
+    @action(detail=True, methods=['GET'])
+    def get_students_of_class(self, request, pk=None):
+        from accounts.serializers import StudentSerializer
+        instance = self.get_object()
+        students=get_model(conf.STUDENT).objects.filter(class_of_school=instance)
+        serializer=StudentSerializer(students,many=True)
+        return Response(serializer.data)
+    @action(detail=True, methods=['GET'])
+    def get_lessons_of_class(self, request, pk=None):
+        from .serializers import Lesson_Serializer
+        instance = self.get_object()
+        lessons=get_model(conf.LESSON).objects.filter(student_class=instance)
+        serializer=Lesson_Serializer(lessons,many=True)
+        return Response(serializer.data)
+    @action(detail=True, methods=['GET'])
+    def get_attendances_of_class(self, request, pk=None):
+        from accounts.serializers import StudentSerializer
+        from .serializers import AttendanceSerializer
+        instance = self.get_object()
+        students=get_model(conf.STUDENT).objects.filter(class_of_school=instance)
+        attendances_arr=[]
+        for student in students:
+            attendances=get_model(conf.ATTENDANCE).objects.filter(user=student.user)
+            attendances_serializer=AttendanceSerializer(attendances,many=True)
+            std_ser=StudentSerializer(student,many=False)
+            print(std_ser.data)
+            attendances_arr.append()
+        serializer=StudentSerializer(students,many=True)
+        return Response(serializer.data)
 
 class AttendanceView(ModelViewSet):
     queryset=get_model(conf.ATTENDANCE).objects.all()
     serializer_class=serializers.AttendanceSerializer
+    filterset_class = AttendanceFilter
 
 class RoomView(ModelViewSet):
     queryset=get_model(conf.ROOM).objects.all()
     serializer_class=serializers.RoomSerializer
 
+    @action(detail=False, methods=['GET'])
+    def rooms_for_class(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        rooms_with_classes = queryset.annotate(num_classes=Count('sinflar'))
+        rooms=[]
+        for room in rooms_with_classes:
+            if room.num_classes == 0:
+                serializer = self.get_serializer(room, many=False)
+                rooms.append(serializer.data)
+        return Response(rooms)
+
 class Lesson_TimeView(ModelViewSet):
     queryset=get_model(conf.LESSON_TIME).objects.all()
     serializer_class=serializers.Lesson_Time_Serializer
-
+  
 def weekday_by_day(desired_weekday):
     current_date = datetime.date.today()
     weekday_number = current_date.weekday()
@@ -103,32 +169,63 @@ class LessonView(ModelViewSet):
     @action(detail=False, methods=['POST'])
     def add_lesson_with_excel(self, request):
         uploaded_file = request.data.get('lessons_table')
-        print(uploaded_file)
-
         if not uploaded_file:
             return Response({"error": "No file was uploaded."}, status=status.HTTP_400_BAD_REQUEST)
         allowed_extensions = ['xls', 'xlsx']
         file_name = uploaded_file.name
         file_extension = file_name.split('.')[-1].lower()
-
-        if not any(file_extension == ext for ext in allowed_extensions):
+        if file_extension not in allowed_extensions:
             return Response({"error": "Invalid file extension."}, status=status.HTTP_400_BAD_REQUEST)
+        fs = FileSystemStorage()
+        filename = fs.save(uploaded_file.name, uploaded_file)
+        file_path = fs.path(filename)
+        try:
+            # Use a database transaction for the following operations
+            with transaction.atomic():
+                # Delete all records in the LESSON model
+                get_model(conf.LESSON).objects.all().delete()
+                # Process the uploaded Excel file
+                obj = AddLessonWithExcel(file_path)
+                obj.start()
+        except Exception as e:
+            # Handle exceptions and provide an appropriate error response
+            return Response({"error": f"An error occurred: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        finally:
+            # Always attempt to delete the uploaded file
+            if fs.exists(filename):
+                fs.delete(filename)
         return Response({"message": "success"}, status=status.HTTP_200_OK)
-
-    def list(self, request, *args, **kwargs):
+    
+    @action(detail=False, methods=['GET'])
+    def get_lessons_of_class(self, request):
         queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        week = self.request.GET.get("week")
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+        data=[]
+        days=("Dushanba","Seshanba","Chorshanba","Payshanba","Juma","Shanba")
+        from .serializers import Lesson_Serializer
+        classes = get_model(conf.CLASS).objects.all()
+        for instance in classes:
+            lessons=queryset.filter(student_class=instance)
+            serializer=Lesson_Serializer(lessons,many=True)
+            obj={
+                "class_id":instance.id,
+                "class_title":instance.title,
+                # "lesson_time":[],
+                "lessons":serializer.data
+            }
+            # for day in days:
+            #     day_lessons=lessons.filter(lesson_date=day)
+            #     serializer=Lesson_Serializer(day_lessons,many=True)
+            #     day_obj={
+            #         "day":day,
+            #         "lessons":serializer.data
+            #     }
+            #     obj["days"].append(day_obj)
+            data.append(obj)
+        # days=("Dushanba","Seshanba","Chorshanba","Payshanba","Juma","Shanba")
         
-        elif week is not None and week in ["weekday_by_week","weekday_by_day"]:
-            return self.week_list(self, request,week=week, *args, **kwargs)
+        return Response(data)
 
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+
 
     def week_list(self, request, *args, **kwargs):
         data = []
@@ -189,8 +286,22 @@ class Parent_CommentView(ModelViewSet):
                 })
         return Response(data)
 
-
 class Teacher_LessonView(ModelViewSet):
     queryset=get_model(conf.TEACHER_LESSON).objects.all()
     serializer_class=serializers.Teacher_LessonSerializer
 
+# lesson class
+# def list(self, request, *args, **kwargs):
+#     queryset = self.filter_queryset(self.get_queryset())
+
+#     page = self.paginate_queryset(queryset)
+#     week = self.request.GET.get("week")
+#     if page is not None:
+#         serializer = self.get_serializer(page, many=True)
+#         return self.get_paginated_response(serializer.data)
+    
+#     elif week is not None and week in ["weekday_by_week","weekday_by_day"]:
+#         return self.week_list(self, request,week=week, *args, **kwargs)
+
+#     serializer = self.get_serializer(queryset, many=True)
+#     return Response(serializer.data)

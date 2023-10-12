@@ -19,8 +19,10 @@ class ClassSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         serializer_context = {'request': request }
         teacher = obj.teacher
-        serializer = TeacherSerializer(teacher, many=False, context=serializer_context)
-        return serializer.data
+        if teacher:
+            serializer = TeacherSerializer(teacher, many=False, context=serializer_context)
+            return serializer.data
+        return None
 
 
 class AttendanceSerializer(serializers.ModelSerializer):
@@ -49,9 +51,51 @@ class Lesson_Time_Serializer(serializers.ModelSerializer):
         fields="__all__"
 
 class Lesson_Serializer(serializers.ModelSerializer):
+    lesson_time=serializers.SerializerMethodField('get_time_dict')
+    fan=serializers.SerializerMethodField('get_fan_dict')
+
+
     class Meta:
         model=get_model(conf.LESSON)
         fields="__all__"
+    
+    def get_std_dict(self, obj):
+        from school.serializers import ScienceSerializer
+        request = self.context.get('request')
+        serializer_context = {'request': request}
+        # print(obj)
+        student_class = obj.student_class
+        if student_class:
+            dic={
+                "id":student_class.id,
+                "title":student_class.title
+            }
+            return dic
+        else:
+            return {}
+    def get_fan_dict(self, obj):
+        from school.serializers import ScienceSerializer
+        request = self.context.get('request')
+        serializer_context = {'request': request}
+        science = obj.science
+        if science:
+            return science.title
+        else:
+            return None
+    def get_time_dict(self, obj):
+        from school.serializers import ScienceSerializer
+        request = self.context.get('request')
+        serializer_context = {'request': request}
+        lesson_time = obj.lesson_time
+        if lesson_time:
+            dic={
+                "id":lesson_time.id,
+                "begin_time":lesson_time.begin_time,
+                "end_time":lesson_time.end_time
+            }
+            return dic
+        else:
+            return {}
 
 class TableLessonSerializer(serializers.Serializer):
     # current_date = serializers.CharField() 
@@ -96,7 +140,7 @@ class Parent_CommentSerializer(serializers.ModelSerializer):
     
     def to_representation(self, instance):
         objs = super(Parent_CommentSerializer, self).to_representation(instance)
-        print(objs['admin'])
+        # print(objs['admin'])
         objs['type'] = "question"
         if objs['admin']:
             objs['type'] = "answer"

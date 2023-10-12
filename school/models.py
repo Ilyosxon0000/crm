@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 import json
 from django.core.exceptions import ValidationError
 from myconf.conf import get_model
+from django.db.models import Case, When, Value
 
 class Science(models.Model):
     title=models.CharField(max_length=255)
@@ -24,6 +25,7 @@ class Class(models.Model):
     title=models.CharField(max_length=255)
     slug=models.SlugField(blank=True,null=True)
     teacher=models.ForeignKey(conf.TEACHER,related_name='sinflar',on_delete=models.CASCADE,blank=True,null=True)
+    room=models.ForeignKey(conf.ROOM,related_name='sinflar',blank=True,null=True,on_delete=models.CASCADE)
     
     def __str__(self):
         return f"class:{self.title}"
@@ -101,8 +103,9 @@ class Lesson(models.Model):
         (FRIDAY,"Juma"),
         (SATURDAY,"Shanba"),
     )
-    teacher=models.ForeignKey(conf.TEACHER,related_name='lessons',on_delete=models.CASCADE)
-    science=models.ForeignKey(conf.SCIENCE,related_name="lessons",on_delete=models.CASCADE)
+    # teacher=models.ForeignKey(conf.TEACHER,related_name='lessons',on_delete=models.CASCADE)
+    teacher=models.TextField(blank=True,null=True)
+    science=models.ForeignKey(conf.SCIENCE,related_name="lessons",blank=True,null=True,on_delete=models.CASCADE)
     student_class=models.ForeignKey(conf.CLASS,related_name='lessons',on_delete=models.CASCADE)
     room=models.ForeignKey(conf.ROOM,related_name='lessons',blank=True,null=True,on_delete=models.CASCADE)
     lesson_date=models.CharField(
@@ -117,7 +120,20 @@ class Lesson(models.Model):
 
     class Meta:
         verbose_name_plural="Darslar"
-        ordering = ['lesson_date', 'lesson_time']
+        ordering = ['lesson_time']
+        # ordering = [
+        #     "student_class",
+        #     Case(
+        #         When(lesson_date="Dushanba", then=Value('1')),
+        #         When(lesson_date="Seshanba", then=Value('2')),
+        #         When(lesson_date="Chorshanba", then=Value('3')),
+        #         When(lesson_date="Payshanba", then=Value('4')),
+        #         When(lesson_date="Juma", then=Value('5')),
+        #         When(lesson_date="Shanba", then=Value('6')),
+        #         output_field=models.CharField(),
+        #     ),
+        #     'lesson_time',
+        # ]
 
 class Grade(models.Model):
     GRADE_CHOICES = (

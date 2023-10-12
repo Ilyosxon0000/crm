@@ -3,7 +3,7 @@ from . import views
 
 router=DefaultRouter()
 router.register("sciences",views.ScienceView,basename="sciences")
-router.register("classes",views.ClassView,basename="classes")
+router.register(r"classes",views.ClassView,basename="classes")
 router.register("attendances",views.AttendanceView,basename="attendances")
 router.register("rooms",views.RoomView,basename="rooms")
 router.register("lesson_times",views.Lesson_TimeView,basename="lesson_times")

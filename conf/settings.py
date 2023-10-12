@@ -26,10 +26,7 @@ SECRET_KEY = 'django-insecure-s0m@ij=z=e8n2x+obp#95ib4r5n@4*i29i9f(@cdzj+jdq6r1#
 DEBUG = True
 DEPLOY=False
 
-if DEPLOY:
-    ALLOWED_HOSTS = ['*']
-else:
-    ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -56,8 +53,8 @@ INSTALLED_APPS = [
     # locale apps
     'school',
     'accounts',
-    'finance',
-    "myconf"
+    "myconf",
+    "finance",
 ]
 AUTH_USER_MODEL = 'accounts.UserProfile'
 
@@ -163,12 +160,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom Config
 
-
-
 REST_FRAMEWORK = {
-    # 'TIME_INPUT_FORMATS': ['%H:%M:%S'],
-    # 'DATETIME_FORMAT': "%m/%d/%Y %H:%M:%S",
-    # 'DATETIME_FORMAT':'%d.%m.%Y %H:%M',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
@@ -181,20 +173,8 @@ REST_FRAMEWORK = {
     ),
 }
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000",
-# ]
 
 CORS_ALLOW_ALL_ORIGINS=True
-
-# CHANNEL_LAYERS = {
-#     "default": {
-#         "BACKEND": "channels_redis.core.RedisChannelLayer",
-#         "CONFIG": {
-#             "hosts": [("127.0.0.1", 6379)],
-#         },
-#     },
-# }
 
 # CRONJOBS = [
 #     ('0 0 1 * *', 'your_app_name.tasks.add_object_to_model_monthly'),

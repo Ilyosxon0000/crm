@@ -19,6 +19,7 @@ def global_update(self, request, *args, **kwargs):
     queryset = self.filter_queryset(self.get_queryset())
     instance = self.get_object()
     data = request.data
+    # print(data['user.first_name'])
     if data.get('user.username',False):
         queryset = queryset.filter(user__username=data['user.username'])
         if len(queryset)!=True:
@@ -45,7 +46,7 @@ def global_update(self, request, *args, **kwargs):
     model=kwargs['model']
     types=kwargs['types']
     file_fields = get_type_name_field(model,types)
-    del_key=['user.username',"permissions"]
+    del_key=['user.username']
     my_dict=request.data.dict()
     for key in my_dict.keys():
         if key in file_fields:
@@ -67,15 +68,12 @@ class UserView(ModelViewSet):
     queryset=get_user_model().objects.all()
     serializer_class=serializers.UserSerializer
 
-
     def create(self, request, *args, **kwargs):
-
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter(
@@ -89,11 +87,9 @@ class UserView(ModelViewSet):
     @action(detail=False, methods=['GET'])
     def check_username_exists(self, request):
         username = request.query_params.get('username')
-        if not username:
+        if not username or len(username)<13:
             return Response({"error": "Username parameter is missing."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Check if the username already exists in the database
-        user_exists = get_user_model().objects.filter(username=username).exists()
+        user_exists = get_user_model().objects.filter(username__endswith=username[1:]).exists()
 
         if user_exists:
             return Response({"exists": True}, status=status.HTTP_200_OK)
@@ -147,11 +143,41 @@ class Teacher_View(ModelViewSet):
     def teachers_for_class(self, request):
         queryset = self.filter_queryset(self.get_queryset())
         teachers_with_classes = queryset.annotate(num_classes=Count('sinflar'))
+        teachers=[]
         for teacher in teachers_with_classes:
             if teacher.num_classes == 0:
                 serializer = self.get_serializer(teacher, many=False)
-                return Response(serializer.data)
-        return Response({"message":"We haven't teachers"})
+                teachers.append(serializer.data)
+        return Response(teachers)
+    @swagger_auto_schema(
+        operation_summary="Upload a single file.",
+        operation_description="Upload a single file using multipart/form-data.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['lesson_table_file'],
+            properties={
+                'lesson_table_file': openapi.Schema(
+                    type=openapi.TYPE_FILE,
+                    format=openapi.FORMAT_BINARY,  # Specify binary format
+                    # description="The allowed extensions excel(xls,xlsx)."
+                )
+            }
+        ),
+        consumes=["multipart/form-data"],  # Set the content type
+        responses={
+            status.HTTP_201_CREATED: "File uploaded successfully.",
+            status.HTTP_400_BAD_REQUEST: "Bad request.",
+        }
+    )
+    @action(detail=True, methods=['POST'])
+    def add_lesson_with_file(self, request,pk=None):
+        uploaded_file = request.data.get('lesson_table_file')
+        if not uploaded_file:
+            return Response({"error": "No file was uploaded."}, status=status.HTTP_400_BAD_REQUEST)
+        instance=self.get_object()
+        instance.lessons_file=uploaded_file
+        instance.save()
+        return Response({"message": "success"}, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
         serializer=global_update(self, request, *args, **kwargs,model=conf.TEACHER,types=models.FileField)
@@ -201,7 +227,6 @@ class Student_View(ModelViewSet):
     @action(detail=False, methods=['POST'])
     def add_student_with_excel(self, request):
         uploaded_file = request.data.get('students_table')
-        print(uploaded_file)
 
         if not uploaded_file:
             return Response({"error": "No file was uploaded."}, status=status.HTTP_400_BAD_REQUEST)
@@ -226,10 +251,39 @@ class Parent_View(ModelViewSet):
     queryset=get_model(conf.PARENT).objects.all()
     serializer_class=serializers.ParentSerializer
 
-    def update(self, request, *args, **kwargs):
-        serializer=global_update(self, request, *args, **kwargs,model=conf.PARENT,types=models.FileField)
+    # def update(self, request, *args, **kwargs):
+    #     serializer=global_update(self, request, *args, **kwargs,model=conf.PARENT,types=models.FileField)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        queryset = self.filter_queryset(self.get_queryset())
+        instance = self.get_object()
+        user=request.data['user']
+        if user.get('username',False):
+            queryset = queryset.filter(user__username=user['username'])
+            if len(queryset)!=True:
+                instance.user.username=user['username']
+                instance.user.save()
+        del user['username']
+        user_data = {
+                'first_name': user.get('first_name'),
+                'last_name': user.get('last_name'),
+                'middle_name': user.get('middle_name'),
+                'type_user': user.get('type_user'),
+            }
+        user_serializer = serializers.UserSerializer(instance=instance.user, data=user_data, partial=True)
+        user_serializer.is_valid(raise_exception=True)
+        user_serializer.update(instance.user,user_data)
+        del request.data['user']
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+        return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -254,4 +308,3 @@ class General_Statistics(APIView):
             "students":len(get_model(conf.STUDENT).objects.all()),
         }
         return Response([data],status=200)
-    
