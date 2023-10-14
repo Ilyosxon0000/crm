@@ -24,6 +24,10 @@ class ClassSerializer(serializers.ModelSerializer):
             return serializer.data
         return None
 
+class ClassForTeacherSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=get_model(conf.CLASS)
+        fields="__all__"
 
 class AttendanceSerializer(serializers.ModelSerializer):
     user_object=serializers.SerializerMethodField('get_user_dict')
@@ -150,3 +154,17 @@ class Teacher_LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model=get_model(conf.TEACHER_LESSON)
         fields="__all__"
+
+from django.conf import settings
+
+class Teacher_LessonThemeSerializer(serializers.ModelSerializer):
+    file_message = serializers.SerializerMethodField()
+
+    class Meta:
+        model = get_model(conf.TEACHER_LESSON)
+        fields = ('id', 'message', 'file_message', 'date', 'teacher')
+
+    def get_file_message(self, obj):
+        base_url = settings.BASE_URL
+        full_url = f"{base_url}{obj.file_message.url}"
+        return full_url

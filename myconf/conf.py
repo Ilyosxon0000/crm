@@ -60,3 +60,7 @@ def get_type_name_field(model,types):
     file_fields = [field.name for field in fields if isinstance(field, types)]
     return file_fields
 
+# Finance
+STUDENT_DEBT="finance.Student_Debt"
+INCOME="finance.InCome"
+EXPENSE="finance.Expense"

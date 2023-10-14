@@ -165,6 +165,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_PERMISSION_CLASSES': (
@@ -172,10 +173,11 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ),
 }
-
+from .simple_jwt import SIMPLE_JWT
 
 CORS_ALLOW_ALL_ORIGINS=True
 
 # CRONJOBS = [
 #     ('0 0 1 * *', 'your_app_name.tasks.add_object_to_model_monthly'),
 # ]
+BASE_URL="http://127.0.0.1:8000"

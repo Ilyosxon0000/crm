@@ -24,7 +24,7 @@ class Science(models.Model):
 class Class(models.Model):
     title=models.CharField(max_length=255)
     slug=models.SlugField(blank=True,null=True)
-    teacher=models.ForeignKey(conf.TEACHER,related_name='sinflar',on_delete=models.CASCADE,blank=True,null=True)
+    teacher=models.OneToOneField(conf.TEACHER,related_name='sinf',on_delete=models.CASCADE,blank=True,null=True)
     room=models.ForeignKey(conf.ROOM,related_name='sinflar',blank=True,null=True,on_delete=models.CASCADE)
     
     def __str__(self):

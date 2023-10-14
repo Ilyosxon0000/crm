@@ -209,20 +209,9 @@ class LessonView(ModelViewSet):
             obj={
                 "class_id":instance.id,
                 "class_title":instance.title,
-                # "lesson_time":[],
                 "lessons":serializer.data
             }
-            # for day in days:
-            #     day_lessons=lessons.filter(lesson_date=day)
-            #     serializer=Lesson_Serializer(day_lessons,many=True)
-            #     day_obj={
-            #         "day":day,
-            #         "lessons":serializer.data
-            #     }
-            #     obj["days"].append(day_obj)
             data.append(obj)
-        # days=("Dushanba","Seshanba","Chorshanba","Payshanba","Juma","Shanba")
-        
         return Response(data)
 
 

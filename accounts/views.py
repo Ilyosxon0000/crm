@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model,get_user
 from myconf.conf import get_model,get_type_name_field
 from myconf import conf
 from rest_framework.viewsets import ModelViewSet
@@ -13,6 +13,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.views import APIView
 from django.db.models import Count
+from django.http import FileResponse
 
 # Create your views here.
 def global_update(self, request, *args, **kwargs):
@@ -74,6 +75,10 @@ class UserView(ModelViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def get_instance(self):
+        return self.request.user
+
     @swagger_auto_schema(
         manual_parameters=[
             openapi.Parameter(
@@ -95,6 +100,29 @@ class UserView(ModelViewSet):
             return Response({"exists": True}, status=status.HTTP_200_OK)
         else:
             return Response({"exists": False}, status=status.HTTP_200_OK)
+    @action(detail=False, methods=['GET'])
+    def me(self, request):
+        user=self.request.user
+        serializer=self.get_serializer
+        print(user)
+        match user.type_user:
+            case 'admin':
+                user=user.admin
+                serializer=serializers.AdminSerializer
+            case 'teacher':
+                user=user.teacher
+                serializer=serializers.TeacherSerializer
+            case 'employer':
+                user=user.employer
+                serializer=serializers.EmployerSerializer
+            case 'student':
+                user=user.student
+                serializer=serializers.StudentSerializer
+            case 'parent':
+                user=user.parent
+                serializer=serializers.ParentSerializer
+        serializer=serializer(user,many=False)
+        return Response(serializer.data)
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
@@ -178,6 +206,71 @@ class Teacher_View(ModelViewSet):
         instance.lessons_file=uploaded_file
         instance.save()
         return Response({"message": "success"}, status=status.HTTP_200_OK)
+    @swagger_auto_schema(
+        operation_summary="Upload a single file.",
+        operation_description="Upload a single file using multipart/form-data.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['lesson_table_file'],
+            properties={
+                'message': openapi.Schema(
+                    type=openapi.TYPE_STRING,  # Changed format to "string"
+                ),
+                'file_message': openapi.Schema(
+                    type=openapi.TYPE_FILE,
+                    format=openapi.FORMAT_BINARY,
+                    # description="The allowed extensions excel(xls,xlsx)."
+                ),
+            }
+        ),
+        consumes=["multipart/form-data"],
+        responses={
+            status.HTTP_201_CREATED: "File uploaded successfully.",
+            status.HTTP_400_BAD_REQUEST: "Bad request.",
+        }
+    )
+    @action(detail=True, methods=['POST'])
+    def add_lesson_theme(self, request,pk=None):
+        instance=self.get_object()
+        message = request.data.get('message')
+        uploaded_file = request.data.get('file_message')
+        if uploaded_file:
+            get_model(conf.TEACHER_LESSON).objects.create(teacher=instance,message=message,file_message=uploaded_file)
+            return Response({"message": "success"}, status=status.HTTP_200_OK)
+        get_model(conf.TEACHER_LESSON).objects.create(teacher=instance,message=message)
+        return Response({"message": "success"}, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['GET'])
+    def get_lesson_themes(self, request,pk=None):
+        from school.serializers import Teacher_LessonThemeSerializer
+        instance=self.get_object()
+        lesson_themes=get_model(conf.TEACHER_LESSON).objects.filter(teacher=instance)
+        serializer=Teacher_LessonThemeSerializer(lesson_themes,many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['GET'])
+    def get_lesson_with_file_url(self, request, pk=None):
+        instance = self.get_object()
+        file_url = request.build_absolute_uri(instance.lessons_file.url)
+        return Response({"lesson_table": file_url}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['GET'])
+    def get_lesson_with_file(self, request, pk=None):
+        instance = self.get_object()
+        file_path = instance.lessons_file.path
+        response = FileResponse(open(file_path, 'rb'), content_type='application/octet-stream')
+        response['Content-Disposition'] = f'attachment; filename="{instance.lessons_file.name}"'
+        return response
+    
+    @action(detail=True, methods=['GET'])
+    def get_class_of_teacher(self, request, pk=None):
+        from school.serializers import ClassForTeacherSerializer
+        instance = self.get_object()
+        if hasattr(instance, 'sinf'):
+            sinf = instance.sinf
+            serializer=ClassForTeacherSerializer(sinf,many=False)
+            return Response({"class":serializer.data})
+        return Response({"class": None}, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
         serializer=global_update(self, request, *args, **kwargs,model=conf.TEACHER,types=models.FileField)
@@ -237,7 +330,31 @@ class Student_View(ModelViewSet):
         if not any(file_extension == ext for ext in allowed_extensions):
             return Response({"error": "Invalid file extension."}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"message": "success"}, status=status.HTTP_200_OK)
+    @action(detail=True, methods=['GET'])
+    def student_debts(self, request,pk=None):
+        from finance import serializers as finserializer
+        from django.core.exceptions import ValidationError
+        instance = self.get_object()
+
+        paid = request.GET.get('paid')
+        filter_conditions = {}
+        if paid is not None:
+            filter_conditions['paid'] = str(paid).capitalize()
+        try:
+            debts=get_model(conf.STUDENT_DEBT).objects.filter(student=instance,**filter_conditions)
+        except ValidationError:
+            return Response({"error":"Noto'g'ri qiymat"})
+        serializer=finserializer.StudentDebtSerializer(debts,many=True)
+        return Response(serializer.data)
     
+    @action(detail=True, methods=['GET'])
+    def student_pays(self, request,pk=None):
+        from finance import serializers as finserializer
+        instance = self.get_object()
+        debts=get_model(conf.INCOME).objects.filter(student=instance)
+        serializer=finserializer.InComeSerializer(debts,many=True)
+        return Response(serializer.data)
+
     def update(self, request, *args, **kwargs):
         serializer=global_update(self, request, *args, **kwargs,model=conf.STUDENT,types=models.FileField)
         return Response(serializer.data, status=status.HTTP_200_OK)

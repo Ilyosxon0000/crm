@@ -13,4 +13,4 @@ router.register("tasks",views.TaskView,basename="tasks")
 router.register("parent_comments",views.Parent_CommentView,basename="parent_comments")
 router.register("teacher_lessons",views.Teacher_LessonView,basename="teacher_lessons")
 
-urlpatterns = []+router.urls
+# urlpatterns = []+router.urls

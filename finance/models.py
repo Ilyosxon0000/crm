@@ -6,16 +6,10 @@ from .validation import EmployerTypeError
 
 # This class is cron debt for student
 class Student_Debt(models.Model):
-    DEBTOR="DEBTOR"
-    PAID="PAID"
-    STATUS=(
-        (DEBTOR,"Qarzdor"),
-        (PAID,"To'lagan"),
-    )
     student=models.ForeignKey(conf.STUDENT,related_name="debts",on_delete=models.CASCADE)
     price=models.IntegerField(default=0)
     balance=models.IntegerField(default=0)
-    status=models.CharField(max_length=50,choices=STATUS,default=DEBTOR)
+    paid=models.BooleanField(default=False)
     created_date=models.DateField(auto_now_add=True)
     updated_date=models.DateField(auto_now=True)
 
@@ -32,7 +26,8 @@ class InCome(models.Model):
     comment=models.TextField(blank=True,null=True)
     # this type var is extra
     type=models.CharField(max_length=50,choices=TYPE,blank=True,null=True)
-    created_date=models.DateField(auto_now_add=True)
+    # created_date=models.DateField(auto_now_add=True)
+    created_date=models.DateField(blank=True,null=True)
     updated_date=models.DateField(auto_now=True)
 
 # This class is in come
@@ -48,7 +43,7 @@ class Expense(models.Model):
     comment=models.TextField(blank=True,null=True)
     # this type var is extra
     type=models.CharField(max_length=50,choices=TYPE,blank=True,null=True)
-    created_date=models.DateField(auto_now_add=True)
+    created_date=models.DateField(blank=True,null=True)
     updated_date=models.DateField(auto_now=True)
 
     def save(self, *args, **kwargs):

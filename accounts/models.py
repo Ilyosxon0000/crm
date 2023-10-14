@@ -27,7 +27,6 @@ class UserProfile(AbstractUser):
                     self.unique_number = new_unique_number
                     break
                 i+=1
-            print(i,"Random i")
         super(UserProfile, self).save(*args, **kwargs)
     # TODO GENERATE 6 Numbers Random
 
@@ -175,6 +174,7 @@ class Teacher(models.Model):
     medical_book = models.FileField(upload_to=teacher_medical_book_path, blank=True, null=True,verbose_name="Tibbiy Daftarcha (086):")
     picture_3x4 = models.FileField(upload_to=teacher_picture_3x4_path, null=True, blank=True,verbose_name="3x4 rasm:")
     completed_salary=models.BooleanField(default=False)
+    lessons_file=models.FileField(upload_to=lessons_file_path, null=True, blank=True,verbose_name="dars jadvali:")
 
     @property
     def oylik(self,soat):
@@ -247,9 +247,13 @@ class Student(models.Model):
     picture_3x4 = models.FileField(upload_to=student_picture_3x4_path, null=True, blank=True,verbose_name="3x4 rasm:")
     school_tab = models.FileField(upload_to=student_school_tab_path, null=True, blank=True,verbose_name="Maktabdan Tabel asli 2-11-sinflar uchun:")
     medical_book = models.FileField(upload_to=student_medical_book_path, blank=True, null=True,verbose_name="Tibbiy Daftarcha (086):")
-    amount=models.IntegerField(default=0,verbose_name="hisobidagi pul miqdori:")
-    latest_amount_date=models.DateTimeField(blank=True,null=True)
-    amount_status=models.CharField(max_length=255,blank=True,null=True,choices=STATUS,verbose_name="hisobidagi pul miqdori turi:")
+    # amount=models.IntegerField(default=0,verbose_name="hisobidagi pul miqdori:")
+    # latest_amount_date=models.DateTimeField(blank=True,null=True)
+    # amount_status=models.CharField(max_length=255,blank=True,null=True,choices=STATUS,verbose_name="hisobidagi pul miqdori turi:")
+    # if self.amount>=0:
+    #     self.amount_status=self.PAID
+    # else:
+    #     self.amount_status=self.NO_PAID
     
     def __str__(self):
         return f"student:{self.user.username}"
@@ -258,10 +262,6 @@ class Student(models.Model):
         self.user.type_user='student'
         self.user.save()
         self.id=self.user.id
-        if self.amount>=0:
-            self.amount_status=self.PAID
-        else:
-            self.amount_status=self.NO_PAID
         super().save(*args, **kwargs)
 
     class Meta:
