@@ -26,8 +26,8 @@ class InCome(models.Model):
     comment=models.TextField(blank=True,null=True)
     # this type var is extra
     type=models.CharField(max_length=50,choices=TYPE,blank=True,null=True)
-    # created_date=models.DateField(auto_now_add=True)
-    created_date=models.DateField(blank=True,null=True)
+    # created_date=models.DateField(blank=True,null=True)
+    created_date=models.DateField(auto_now_add=True)
     updated_date=models.DateField(auto_now=True)
 
 # This class is in come
@@ -43,7 +43,8 @@ class Expense(models.Model):
     comment=models.TextField(blank=True,null=True)
     # this type var is extra
     type=models.CharField(max_length=50,choices=TYPE,blank=True,null=True)
-    created_date=models.DateField(blank=True,null=True)
+    # created_date=models.DateField(blank=True,null=True)
+    created_date=models.DateField(auto_now_add=True)
     updated_date=models.DateField(auto_now=True)
 
     def save(self, *args, **kwargs):
