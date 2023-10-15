@@ -56,8 +56,8 @@ class Data_Finance(APIView):
             y_i = yillik_income.aggregate(total_year=Sum('amount'))
             y_e = yillik_expense.aggregate(total_year=Sum('amount'))
             data_for_list['name']=x
-            data_for_list['kirim'] = y_i['total_year']
-            data_for_list['chiqim'] = y_e['total_year']
+            data_for_list['kirim'] = y_i['total_year'] if y_i['total_year'] else 0
+            data_for_list['chiqim'] = y_e['total_year'] if y_e['total_year'] else 0
             data_for_list['months'] = []
             for i in data[x]:
                 month_name = calendar.month_name[i[0]]
@@ -68,8 +68,8 @@ class Data_Finance(APIView):
                     m_e = month_expense.aggregate(total_month=Sum('amount'))
                     data_each_month = {
                         "name":month_name,
-                        "kirim":m_i['total_month'],
-                        "chiqim":m_e['total_month'],
+                        "kirim":m_i['total_month'] if m_i['total_month'] else 0,
+                        "chiqim":m_e['total_month'] if m_e['total_month'] else 0,
                         'days': []
                     }
                     # data_each_month[month_name] = f['total_month']
@@ -79,8 +79,8 @@ class Data_Finance(APIView):
                         kun_income = month_income.filter(created_date__day=kun).aggregate(total_kun=Sum('amount'))
                         kun_expense = month_expense.filter(created_date__day=kun).aggregate(total_kun=Sum('amount'))
                         if kun_income or kun_expense:
-                            kun_income_value = kun_income['total_kun']
-                            kun_expense_value = kun_expense['total_kun']
+                            kun_income_value = kun_income['total_kun'] if kun_income['total_kun'] else 0
+                            kun_expense_value = kun_expense['total_kun'] if kun_expense['total_kun'] else 0
                             kun_data['name'] = kun
                             kun_data['kirim'] = kun_income_value
                             kun_data['chiqim'] = kun_expense_value
@@ -92,22 +92,22 @@ class Data_Finance(APIView):
                     data_each_month['days'].append(kunlar)
                 else:
                     # 2-usul
-                    # data_each_month = {
-                    #     "name":month_name,
-                    #     "kirim":0,
-                    #     "chiqim":0,
-                    #     'days': []
-                    # }
-                    # kunlar = []
-                    # for kun in range(1, i[1] + 1):
-                    #     kun_data={}
-                    #     kun_data['name'] = kun
-                    #     kun_data['kirim'] = 0
-                    #     kun_data["chiqim"]=0,
-                    #     kunlar.append(kun_data)
-                    # data_each_month['days'].append(kunlar)
+                    data_each_month = {
+                        "name":month_name,
+                        "kirim":0,
+                        "chiqim":0,
+                        'days': []
+                    }
+                    kunlar = []
+                    for kun in range(1, i[1] + 1):
+                        kun_data={}
+                        kun_data['name'] = kun
+                        kun_data['kirim'] = 0
+                        kun_data["chiqim"]=0,
+                        kunlar.append(kun_data)
+                    data_each_month['days'].append(kunlar)
 
-                    data_each_month = {month_name: {"days":i[1]}}
+                    # data_each_month = {month_name: {"days":i[1]}}
                 data_for_list['months'].append(data_each_month)
             data_for_frontend.append(data_for_list)
 

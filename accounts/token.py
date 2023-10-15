@@ -18,6 +18,7 @@ class CustomTokenObtainPairSerializer(TokenObtainSerializer):
 
         data["refresh"] = str(refresh)
         data["access"] = str(refresh.access_token)
+        data['id'] = self.user.id
         data['type_user'] = self.user.type_user
         
 
@@ -27,7 +28,6 @@ class CustomTokenObtainPairSerializer(TokenObtainSerializer):
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
-
 
 urlpatterns = [
     path('token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),

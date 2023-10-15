@@ -215,7 +215,7 @@ class Teacher_View(ModelViewSet):
         }
     )
     @action(detail=False, methods=['POST'])
-    def add_lesson_with_file(self, request):
+    def add_lesson_with_file(self, request,pk=None):
         uploaded_file = request.data.get('lesson_table_file')
         if not uploaded_file:
             return Response({"error": "No file was uploaded."}, status=status.HTTP_400_BAD_REQUEST)
@@ -246,9 +246,9 @@ class Teacher_View(ModelViewSet):
             status.HTTP_400_BAD_REQUEST: "Bad request.",
         }
     )
-    @action(detail=False, methods=['POST'])
-    def add_lesson_theme(self, request):
-        instance=self.get_teacher()
+    @action(detail=True, methods=['POST'])
+    def add_lesson_theme(self, request,pk=None):
+        instance=self.get_object()
         message = request.data.get('message')
         uploaded_file = request.data.get('file_message')
         if uploaded_file:
@@ -257,32 +257,32 @@ class Teacher_View(ModelViewSet):
         get_model(conf.TEACHER_LESSON).objects.create(teacher=instance,message=message)
         return Response({"message": "success"}, status=status.HTTP_200_OK)
     
-    @action(detail=False, methods=['GET'])
-    def get_lesson_themes(self, request):
+    @action(detail=True, methods=['GET'])
+    def get_lesson_themes(self, request,pk=None):
         from school.serializers import Teacher_LessonThemeSerializer
-        instance=self.get_teacher()
+        instance=self.get_object()
         lesson_themes=get_model(conf.TEACHER_LESSON).objects.filter(teacher=instance)
         serializer=Teacher_LessonThemeSerializer(lesson_themes,many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'])
-    def get_lesson_with_file_url(self, request):
-        instance = self.get_teacher()
+    @action(detail=True, methods=['GET'])
+    def get_lesson_with_file_url(self, request, pk=None):
+        instance = self.get_object()
         file_url = request.build_absolute_uri(instance.lessons_file.url)
         return Response({"lesson_table": file_url}, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['GET'])
-    def get_lesson_with_file(self, request):
-        instance = self.get_teacher()
+    @action(detail=True, methods=['GET'])
+    def get_lesson_with_file(self, request, pk=None):
+        instance = self.get_object()
         file_path = instance.lessons_file.path
         response = FileResponse(open(file_path, 'rb'), content_type='application/octet-stream')
         response['Content-Disposition'] = f'attachment; filename="{instance.lessons_file.name}"'
         return response
     
-    @action(detail=False, methods=['GET'])
-    def get_class_of_teacher(self, request):
+    @action(detail=True, methods=['GET'])
+    def get_class_of_teacher(self, request, pk=None):
         from school.serializers import ClassForTeacherSerializer
-        instance = self.get_teacher()
+        instance = self.get_object()
         if hasattr(instance, 'sinf'):
             sinf = instance.sinf
             serializer=ClassForTeacherSerializer(sinf,many=False)
@@ -314,20 +314,6 @@ class Employer_View(ModelViewSet):
 class Student_View(ModelViewSet):
     queryset=get_model(conf.STUDENT).objects.all()
     serializer_class=serializers.StudentSerializer
-
-    def get_user(self):
-        from django.contrib.auth.models import AnonymousUser
-        if type(self.request.user)==AnonymousUser:
-            return "AnonymousUser"
-        return self.request.user
-    def get_student(self):
-        from django.contrib.auth.models import AnonymousUser
-        if type(self.request.user)!=AnonymousUser:
-            if hasattr(self.request.user,'student'):
-                return self.request.user.student
-            return "ItIsNotTeacher"
-        return "AnonymousUser"
-
     @swagger_auto_schema(
         operation_summary="Upload a single file.",
         operation_description="Upload a single file using multipart/form-data.",
@@ -361,12 +347,11 @@ class Student_View(ModelViewSet):
         if not any(file_extension == ext for ext in allowed_extensions):
             return Response({"error": "Invalid file extension."}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"message": "success"}, status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=['GET'])
-    def student_debts(self, request):
-        instance = self.get_student()
+    @action(detail=True, methods=['GET'])
+    def student_debts(self, request,pk=None):
         from finance import serializers as finserializer
         from django.core.exceptions import ValidationError
+        instance = self.get_object()
 
         paid = request.GET.get('paid')
         filter_conditions = {}
@@ -379,10 +364,10 @@ class Student_View(ModelViewSet):
         serializer=finserializer.StudentDebtSerializer(debts,many=True)
         return Response(serializer.data)
     
-    @action(detail=False, methods=['GET'])
-    def student_pays(self, request):
-        instance = self.get_student()
+    @action(detail=True, methods=['GET'])
+    def student_pays(self, request,pk=None):
         from finance import serializers as finserializer
+        instance = self.get_object()
         debts=get_model(conf.INCOME).objects.filter(student=instance)
         serializer=finserializer.InComeSerializer(debts,many=True)
         return Response(serializer.data)

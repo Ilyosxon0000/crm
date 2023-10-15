@@ -46,6 +46,27 @@ class ClassView(ModelViewSet):
     queryset=get_model(conf.CLASS).objects.all()
     serializer_class=serializers.ClassSerializer
     lookup_field = 'pk'
+    def get_user(self):
+        from django.contrib.auth.models import AnonymousUser
+        if type(self.request.user)==AnonymousUser:
+            return "AnonymousUser"
+        return self.request.user
+    
+    def get_teacher(self):
+        from django.contrib.auth.models import AnonymousUser
+        if type(self.request.user)!=AnonymousUser:
+            if hasattr(self.request.user,'teacher'):
+                return self.request.user.teacher
+            return "ItIsNotTeacher"
+        return "AnonymousUser"
+
+    def get_student(self):
+        from django.contrib.auth.models import AnonymousUser
+        if type(self.request.user)!=AnonymousUser:
+            if hasattr(self.request.user,'student'):
+                return self.request.user.student
+            return "ItIsNotTeacher"
+        return "AnonymousUser"
 
     @action(detail=False, methods=['GET'])
     def get_students_of_classes(self, request,):
@@ -60,22 +81,57 @@ class ClassView(ModelViewSet):
             class_data["students"]=stdserializer.data
             data.append(class_data)
         return Response(data)
+    
+    @action(detail=False, methods=['GET'])
+    def get_students_of_class(self, request):
+        from accounts.serializers import StudentSerializer
+        instance = self.get_teacher().sinf
+        students=get_model(conf.STUDENT).objects.filter(class_of_school=instance)
+        serializer=StudentSerializer(students,many=True)
+        return Response(serializer.data)
+    
     @action(detail=True, methods=['GET'])
-    def get_students_of_class(self, request, pk=None):
+    def get_students_of_class_pk(self, request, pk=None):
         from accounts.serializers import StudentSerializer
         instance = self.get_object()
         students=get_model(conf.STUDENT).objects.filter(class_of_school=instance)
         serializer=StudentSerializer(students,many=True)
         return Response(serializer.data)
-    @action(detail=True, methods=['GET'])
+    
+    @action(detail=False, methods=['GET'])
     def get_lessons_of_class(self, request, pk=None):
+        from .serializers import Lesson_Serializer
+        instance = self.get_teacher().sinf
+        lessons=get_model(conf.LESSON).objects.filter(student_class=instance)
+        serializer=Lesson_Serializer(lessons,many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['GET'])
+    def get_lessons_of_class_pk(self, request, pk=None):
         from .serializers import Lesson_Serializer
         instance = self.get_object()
         lessons=get_model(conf.LESSON).objects.filter(student_class=instance)
         serializer=Lesson_Serializer(lessons,many=True)
         return Response(serializer.data)
-    @action(detail=True, methods=['GET'])
+    
+    @action(detail=False, methods=['GET'])
     def get_attendances_of_class(self, request, pk=None):
+        from accounts.serializers import StudentSerializer
+        from .serializers import AttendanceSerializer
+        instance = self.get_teacher().sinf
+        students=get_model(conf.STUDENT).objects.filter(class_of_school=instance)
+        attendances_arr=[]
+        for student in students:
+            attendances=get_model(conf.ATTENDANCE).objects.filter(user=student.user)
+            attendances_serializer=AttendanceSerializer(attendances,many=True)
+            std_ser=StudentSerializer(student,many=False)
+            print(std_ser.data)
+            attendances_arr.append()
+        serializer=StudentSerializer(students,many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['GET'])
+    def get_attendances_of_class_pk(self, request, pk=None):
         from accounts.serializers import StudentSerializer
         from .serializers import AttendanceSerializer
         instance = self.get_object()
