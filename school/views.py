@@ -116,7 +116,6 @@ class ClassView(ModelViewSet):
     
     @action(detail=False, methods=['GET'])
     def get_attendances_of_class(self, request, pk=None):
-        from accounts.serializers import StudentSerializer
         from .serializers import AttendanceSerializer
         instance = self.get_teacher().sinf
         students=get_model(conf.STUDENT).objects.filter(class_of_school=instance)
@@ -124,11 +123,16 @@ class ClassView(ModelViewSet):
         for student in students:
             attendances=get_model(conf.ATTENDANCE).objects.filter(user=student.user)
             attendances_serializer=AttendanceSerializer(attendances,many=True)
-            std_ser=StudentSerializer(student,many=False)
-            print(std_ser.data)
-            attendances_arr.append()
-        serializer=StudentSerializer(students,many=True)
-        return Response(serializer.data)
+            student_dict={
+                "id":student.id,
+                "username":student.user.username,
+                "first_name":student.user.first_name,
+                "last_name":student.user.last_name,
+                "attendances":[]
+            }
+            student_dict['attendances']=attendances_serializer.data
+            attendances_arr.append(student_dict)
+        return Response(attendances_arr)
     
     @action(detail=True, methods=['GET'])
     def get_attendances_of_class_pk(self, request, pk=None):

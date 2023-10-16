@@ -120,14 +120,6 @@ class Teacher(models.Model):
         formatted_date = current_date.strftime("%Y_%m_%d")
         return f"uploads/teachers/{instance.user.username}/lessons_file/{formatted_date}/{filename}"
 
-    FIXED = "FIXED"
-    PER_HOURS = "PER_HOURS"
-    SALARY_TYPE = (
-        (FIXED, "fixed"),
-        (PER_HOURS, "soatbay")
-    )
-
-
     MALE = "MALE"
     FEMALE = "FEMALE"
     GENDER = (
@@ -157,14 +149,10 @@ class Teacher(models.Model):
     user = models.OneToOneField(get_user_model(), related_name='teacher', on_delete=models.CASCADE)
     sciences = models.ManyToManyField('school.Science', related_name="teachers",blank=True,verbose_name="Fanlar:")
     id_card = models.CharField(max_length=50, blank=True, null=True,verbose_name="Pasport seriya raqami:")
-    salary_type = models.CharField(max_length=255, choices=SALARY_TYPE,verbose_name="Oylik turi(Fixed yoki Soatbay):")
-    salary = models.IntegerField(default=0,verbose_name="Oylik maosh(soatbay narx):")
     date_of_employment = models.DateField(blank=True, null=True,verbose_name="Ishga kirgan sanasi:")
     gender = models.CharField(max_length=255, choices=GENDER,verbose_name="Jinsi:")
     address = models.CharField(max_length=400, blank=True, null=True,verbose_name="Manzili:")
-    description = models.TextField(blank=True, null=True,verbose_name="Qo'shimcha ma'lumot:")
     experience = models.CharField(max_length=255,blank=True,null=True, choices=EXPERIENCE_TYPE,verbose_name="Tajriba:")
-    experience_desc = models.CharField(max_length=255, blank=True, null=True,verbose_name="tajriba haqida:")
     language_certificate = models.CharField(max_length=255,blank=True,null=True, choices=LANGUAGE_CERTIFICATE_TYPE,verbose_name="Til sertifikati:")
     language_certificate_file = models.FileField(upload_to=teacher_language_certificate_path, blank=True, null=True,verbose_name="Til sertifikati fayl shakli:")
     lens = models.FileField(upload_to=teacher_lens_path, blank=True, null=True,verbose_name="Obyektivka:")
@@ -175,12 +163,6 @@ class Teacher(models.Model):
     picture_3x4 = models.FileField(upload_to=teacher_picture_3x4_path, null=True, blank=True,verbose_name="3x4 rasm:")
     completed_salary=models.BooleanField(default=False)
     lessons_file=models.FileField(upload_to=lessons_file_path, null=True, blank=True,verbose_name="dars jadvali:")
-
-    @property
-    def oylik(self,soat):
-        if self.salary_type==self.FIXED:
-            return self.salary
-        return self.salary*soat
 
     def __str__(self):
         return f"teacher:{self.user.username}"

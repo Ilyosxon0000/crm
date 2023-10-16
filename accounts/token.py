@@ -1,4 +1,3 @@
-from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -6,7 +5,8 @@ from rest_framework_simplejwt.views import (
 )
 from django.urls import path
 from rest_framework_simplejwt.serializers import Dict,Any,api_settings,update_last_login,TokenObtainSerializer
-
+from myconf.conf import get_model
+from myconf import conf
 
 class CustomTokenObtainPairSerializer(TokenObtainSerializer):
     token_class = RefreshToken
@@ -20,8 +20,9 @@ class CustomTokenObtainPairSerializer(TokenObtainSerializer):
         data["access"] = str(refresh.access_token)
         data['id'] = self.user.id
         data['type_user'] = self.user.type_user
+        if self.user.type_user=="admin":
+            data['type_user'] = self.user.admin.types.slug
         
-
         if api_settings.UPDATE_LAST_LOGIN:
             update_last_login(None, self.user)
         return data

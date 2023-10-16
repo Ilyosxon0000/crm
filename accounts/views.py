@@ -325,7 +325,7 @@ class Student_View(ModelViewSet):
         if type(self.request.user)!=AnonymousUser:
             if hasattr(self.request.user,'student'):
                 return self.request.user.student
-            return "ItIsNotTeacher"
+            return "ItIsNotStudent"
         return "AnonymousUser"
 
     @swagger_auto_schema(
@@ -386,6 +386,14 @@ class Student_View(ModelViewSet):
         debts=get_model(conf.INCOME).objects.filter(student=instance)
         serializer=finserializer.InComeSerializer(debts,many=True)
         return Response(serializer.data)
+    
+    @action(detail=False, methods=['GET'])
+    def get_student_attendances(self, request):
+        from .serializers import AttendanceSerializer
+        instance = self.get_student()
+        attendances=get_model(conf.ATTENDANCE).objects.filter(user=instance)
+        serializer=AttendanceSerializer(attendances,many=True)
+        return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
         serializer=global_update(self, request, *args, **kwargs,model=conf.STUDENT,types=models.FileField)
@@ -399,10 +407,6 @@ class Student_View(ModelViewSet):
 class Parent_View(ModelViewSet):
     queryset=get_model(conf.PARENT).objects.all()
     serializer_class=serializers.ParentSerializer
-
-    # def update(self, request, *args, **kwargs):
-    #     serializer=global_update(self, request, *args, **kwargs,model=conf.PARENT,types=models.FileField)
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
@@ -429,24 +433,78 @@ class Parent_View(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         if getattr(instance, '_prefetched_objects_cache', None):
-            # If 'prefetch_related' has been applied to a queryset, we need to
-            # forcibly invalidate the prefetch cache on the instance.
             instance._prefetched_objects_cache = {}
         return Response(serializer.data)
+    
+    def get_user(self):
+        from django.contrib.auth.models import AnonymousUser
+        if type(self.request.user)==AnonymousUser:
+            return "AnonymousUser"
+        return self.request.user
+    
+    def get_parent(self):
+        from django.contrib.auth.models import AnonymousUser
+        if type(self.request.user)!=AnonymousUser:
+            if hasattr(self.request.user,'parent'):
+                return self.request.user.parent
+            return "ItIsNotParent"
+        return "AnonymousUser"
+    
+    def get_children(self):
+        parent=self.get_parent()
+        if hasattr(parent,"children"):
+            return parent.children.all()
+        return 'ItHasNotChildren'
+
+    @action(detail=False, methods=['GET'])
+    def children_debts(self, request):
+        data=[]
+        children=self.get_children()
+        if children!="ItHasNotChildren":
+            for instance in children:
+                from finance import serializers as finserializer
+                from django.core.exceptions import ValidationError
+
+                paid = request.GET.get('paid')
+                filter_conditions = {}
+                if paid is not None:
+                    filter_conditions['paid'] = str(paid).capitalize()
+                try:
+                    debts=get_model(conf.STUDENT_DEBT).objects.filter(student=instance,**filter_conditions)
+                except ValidationError:
+                    return Response({"error":"Noto'g'ri qiymat"})
+                serializer=finserializer.StudentDebtSerializer(debts,many=True)
+                data.append(serializer.data)
+        return Response(data)
+    
+    @action(detail=False, methods=['GET'])
+    def children_pays(self, request):
+        data=[]
+        children=self.get_children()
+        if children!="ItHasNotChildren":
+            for instance in children:
+                from finance import serializers as finserializer
+                debts=get_model(conf.INCOME).objects.filter(student=instance)
+                serializer=finserializer.InComeSerializer(debts,many=True)
+                data.append(serializer.data)
+        return Response(data)
+    
+    @action(detail=False, methods=['GET'])
+    def get_children_attendances(self, request):
+        from .serializers import AttendanceSerializer
+        data=[]
+        children=self.get_children()
+        if children!="ItHasNotChildren":
+            for instance in children:
+                attendances=get_model(conf.ATTENDANCE).objects.filter(user=instance)
+                serializer=AttendanceSerializer(attendances,many=True)
+                data.append(serializer.data)
+        return Response(data)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response({"success":"true"},status=status.HTTP_200_OK)
-
-
-class StudentxlsView(APIView):
-    def get(self,request,*args,**kwargs):
-        return Response({"message":"FormData","student_table":"student_table.xls"},status=200)
-    
-    def post(self,request,*args,**kwargs):
-        return Response(request.data,status=200)
-
 
 class General_Statistics(APIView):
     def get(self,request,*args,**kwargs):

@@ -121,19 +121,6 @@ class Lesson(models.Model):
     class Meta:
         verbose_name_plural="Darslar"
         ordering = ['lesson_time']
-        # ordering = [
-        #     "student_class",
-        #     Case(
-        #         When(lesson_date="Dushanba", then=Value('1')),
-        #         When(lesson_date="Seshanba", then=Value('2')),
-        #         When(lesson_date="Chorshanba", then=Value('3')),
-        #         When(lesson_date="Payshanba", then=Value('4')),
-        #         When(lesson_date="Juma", then=Value('5')),
-        #         When(lesson_date="Shanba", then=Value('6')),
-        #         output_field=models.CharField(),
-        #     ),
-        #     'lesson_time',
-        # ]
 
 class Grade(models.Model):
     GRADE_CHOICES = (
