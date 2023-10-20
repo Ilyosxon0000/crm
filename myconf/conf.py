@@ -39,8 +39,9 @@ ROOM="school.Room"#Davomat modeli
 LESSON_TIME="school.Lesson_Time"#Dars soati modeli
 LESSON="school.Lesson"#Davomat modeli
 GRADE="school.Grade"#Davomat modeli
-TASK="school.Task"#Davomat modeli
-PARENT_COMMENT="school.Parent_Comment"#Davomat modeli
+TASK="school.Task"#Task modeli
+TASK_FOR_CLASS="school.TaskForClass"#Davomat modeli
+PARENT_COMMENT="school.Parent_Comment"#Ota ona comment modeli
 TEACHER_LESSON="school.Teacher_Lesson"#Davomat modeli
 
 def all_days():

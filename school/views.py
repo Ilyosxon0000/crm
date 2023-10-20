@@ -150,10 +150,32 @@ class ClassView(ModelViewSet):
         serializer=StudentSerializer(students,many=True)
         return Response(serializer.data)
 
+from django.utils import timezone
+from dateutil.relativedelta import relativedelta
+
 class AttendanceView(ModelViewSet):
     queryset=get_model(conf.ATTENDANCE).objects.all()
     serializer_class=serializers.AttendanceSerializer
     filterset_class = AttendanceFilter
+
+    def get_queryset(self):
+        date_type = self.request.query_params.get('date_type')
+        today = timezone.now().date()
+
+        if date_type == 'daily':
+            return get_model(conf.ATTENDANCE).objects.filter(date=today)
+        elif date_type == 'weekly':
+            # Assuming you want to filter by the current week (Monday to Sunday)
+            start_of_week = today - datetime.timedelta(days=today.weekday())
+            end_of_week = start_of_week + datetime.timedelta(days=6)
+            return get_model(conf.ATTENDANCE).objects.filter(date__range=(start_of_week, end_of_week))
+        elif date_type == 'monthly':
+            start_of_month = today.replace(day=1)
+            end_of_month = (start_of_month + relativedelta(months=1)) - datetime.timedelta(days=1)
+            return get_model(conf.ATTENDANCE).objects.filter(date__range=(start_of_month, end_of_month))
+        else:
+            return get_model(conf.ATTENDANCE).objects.all()
+
 
 class RoomView(ModelViewSet):
     queryset=get_model(conf.ROOM).objects.all()
@@ -306,6 +328,12 @@ class TaskView(ModelViewSet):
     queryset=get_model(conf.TASK).objects.all()
     serializer_class=serializers.TaskSerializer
     filterset_fields="__all__"
+
+class TaskForClassView(ModelViewSet):
+    queryset=get_model(conf.TASK_FOR_CLASS).objects.all()
+    serializer_class=serializers.TaskForClassSerializer
+    filterset_fields="__all__"
+    
 
 class Parent_CommentView(ModelViewSet):
     queryset=get_model(conf.PARENT_COMMENT).objects.all()

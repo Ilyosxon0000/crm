@@ -47,9 +47,9 @@ class AdminSerializer(serializers.ModelSerializer):
         fields="__all__"
     
     def create(self, validated_data):
-        user_data = validated_data.pop('user')  # Extract user data
-        permissions_data = validated_data.pop('permissions', [])  # Extract permissions data (if provided)
-        user_instance = UserSerializer().create(user_data)  # Create user
+        user_data = validated_data.pop('user')
+        permissions_data = validated_data.pop('permissions', [])
+        user_instance = UserSerializer().create(user_data)
         admin = get_model(conf.ADMIN).objects.create(user=user_instance, **validated_data)
         admin.permissions.set(permissions_data)
         return admin
@@ -113,10 +113,27 @@ class EmployerSerializer(serializers.ModelSerializer):
 
 class StudentSerializer(serializers.ModelSerializer):
     user=UserSerializer()
+    sinf=serializers.SerializerMethodField("get_sinf_dict")
 
     class Meta:
         model=get_model(conf.STUDENT)
         fields="__all__"
+    
+    def get_sinf_dict(self, obj):
+        sinf = obj.class_of_school
+        if sinf:
+            return {
+                "name":sinf.title,
+                "teacher":{
+                    "username":sinf.teacher.user.username,
+                    "first_name":sinf.teacher.user.first_name,
+                    "last_name":sinf.teacher.user.last_name,
+                } if sinf.teacher else None,
+                "id":sinf.id,
+                "xona":sinf.room.name if sinf.room else None
+            }
+        else:
+            return {}
     
     def create(self, validated_data):
         user_data = validated_data.pop('user')  # Extract user data

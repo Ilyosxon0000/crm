@@ -136,6 +136,29 @@ class TaskSerializer(serializers.ModelSerializer):
         user = obj.to_user
         serializer = serializers.UserSerializer(user, many=False, context=serializer_context)
         return serializer.data
+    
+class TaskForClassSerializer(serializers.ModelSerializer):
+    from_teacher_object=serializers.SerializerMethodField('get_from_teacher_dict')
+    to_class_object=serializers.SerializerMethodField('get_to_class_dict')
+    class Meta:
+        model=get_model(conf.TASK_FOR_CLASS)
+        fields="__all__"
+    
+    def get_from_teacher_dict(self, obj):
+        from accounts import serializers
+        request = self.context.get('request')
+        serializer_context = {'request': request }
+        teacher = obj.from_teacher
+        serializer = serializers.TeacherSerializer(teacher, many=False, context=serializer_context)
+        return serializer.data
+    
+    def get_to_class_dict(self, obj):
+        from accounts import serializers
+        request = self.context.get('request')
+        serializer_context = {'request': request }
+        class_of_school = obj.to_class
+        serializer = ClassSerializer(class_of_school, many=False, context=serializer_context)
+        return serializer.data
 
 class Parent_CommentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -154,17 +177,3 @@ class Teacher_LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model=get_model(conf.TEACHER_LESSON)
         fields="__all__"
-
-from django.conf import settings
-
-class Teacher_LessonThemeSerializer(serializers.ModelSerializer):
-    file_message = serializers.SerializerMethodField()
-
-    class Meta:
-        model = get_model(conf.TEACHER_LESSON)
-        fields = ('id', 'message', 'file_message', 'date', 'teacher')
-
-    def get_file_message(self, obj):
-        base_url = settings.BASE_URL
-        full_url = f"{base_url}{obj.file_message.url}"
-        return full_url

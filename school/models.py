@@ -159,11 +159,22 @@ class Task(models.Model):
     begin_date=models.DateTimeField(blank=True,null=True)
     end_date=models.DateTimeField(blank=True,null=True)
 
-
     def save(self, *args, **kwargs):
         if self.from_user == self.to_user:
             raise ValidationError("from_user and to_user cannot be the same.")
         super().save(*args, **kwargs)
+
+class TaskForClass(models.Model):
+    from_teacher=models.ForeignKey(get_model(conf.TEACHER),related_name='tasksforclass',on_delete=models.CASCADE)
+    to_class=models.ForeignKey(get_model(conf.CLASS),related_name='tasks',on_delete=models.CASCADE)
+    task_title=models.CharField(max_length=255)
+    task_message=models.TextField()
+    complete_to_user=models.BooleanField(default=False)
+    complete_from_user=models.BooleanField(default=False)
+    created_date=models.DateTimeField(auto_now_add=True)
+    change_date=models.DateTimeField(auto_now=True)
+    begin_date=models.DateTimeField(blank=True,null=True)
+    end_date=models.DateTimeField(blank=True,null=True)
 
 class Parent_Comment(models.Model):
     parent=models.ForeignKey(get_model(conf.PARENT),related_name='parent_comments',on_delete=models.CASCADE)
@@ -177,3 +188,9 @@ class Teacher_Lesson(models.Model):
     message=models.TextField()
     file_message=models.FileField(upload_to="uploads/message/%Y_%m_%d",blank=True,null=True)
     date=models.DateTimeField(blank=True,null=True)
+
+class Company(models.Model):
+    name=models.CharField(max_length=255,blank=True,null=True)
+    begin_date=models.DateField(blank=True,null=True)
+    end_date=models.DateField(blank=True,null=True)
+    study_price=models.IntegerField(default=0)

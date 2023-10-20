@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model,get_user
+from django.contrib.auth import get_user_model
 from myconf.conf import get_model,get_type_name_field
 from myconf import conf
 from rest_framework.viewsets import ModelViewSet
@@ -107,26 +107,58 @@ class UserView(ModelViewSet):
     def me(self, request):
         user=self.get_user()
         if user!="AnonymousUser":
-            serializer=self.get_serializer
+            print(user.is_active)
             match user.type_user:
                 case 'admin':
                     user=user.admin
-                    serializer=serializers.AdminSerializer
+                    self.serializer_class=serializers.AdminSerializer
                 case 'teacher':
                     user=user.teacher
-                    serializer=serializers.TeacherSerializer
+                    self.serializer_class=serializers.TeacherSerializer
                 case 'employer':
                     user=user.employer
-                    serializer=serializers.EmployerSerializer
+                    self.serializer_class=serializers.EmployerSerializer
                 case 'student':
                     user=user.student
-                    serializer=serializers.StudentSerializer
+                    self.serializer_class=serializers.StudentSerializer
                 case 'parent':
                     user=user.parent
-                    serializer=serializers.ParentSerializer
-            serializer=serializer(user,many=False)
+                    self.serializer_class=serializers.ParentSerializer
+            serializer=self.get_serializer(user,many=False)
             return Response(serializer.data)
         return Response({"user":user})
+    
+    @action(detail=False, methods=['GET'])
+    def get_my_attendances(self, request):
+        from .serializers import AttendanceSerializer
+        instance = self.get_user()
+        attendances=get_model(conf.ATTENDANCE).objects.filter(user=instance)
+        serializer=AttendanceSerializer(attendances,many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['GET'])
+    def get_user_attendances(self, request,pk=None):
+        from .serializers import AttendanceSerializer
+        instance = self.get_object()
+        attendances=get_model(conf.ATTENDANCE).objects.filter(user=instance)
+        serializer=AttendanceSerializer(attendances,many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['GET'])
+    def change_active_to_passive(self, request,pk=None):
+        user=self.get_object()
+        user.is_active=False
+        user.save()
+        return Response({"message":"success"})
+
+    @action(detail=True, methods=['GET'])
+    def change_passive_to_active(self, request,pk=None):
+        user=self.get_object()
+        user.is_active=True
+        user.save()
+        return Response({"message":"success"})
+
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         self.perform_destroy(instance)
@@ -257,12 +289,24 @@ class Teacher_View(ModelViewSet):
         get_model(conf.TEACHER_LESSON).objects.create(teacher=instance,message=message)
         return Response({"message": "success"}, status=status.HTTP_200_OK)
     
+    @action(detail=False, methods=['POST'])
+    def add_task_to_class(self, request):
+        from school import serializers
+        instance=self.get_teacher()
+        data=request.data
+        data["from_teacher"]=instance.id
+        serializer=serializers.TaskForClassSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"message": "success"}, status=status.HTTP_200_OK)
+    
     @action(detail=False, methods=['GET'])
     def get_lesson_themes(self, request):
-        from school.serializers import Teacher_LessonThemeSerializer
+        from school.serializers import Teacher_LessonSerializer
         instance=self.get_teacher()
         lesson_themes=get_model(conf.TEACHER_LESSON).objects.filter(teacher=instance)
-        serializer=Teacher_LessonThemeSerializer(lesson_themes,many=True)
+        context=self.get_serializer_context()
+        serializer=Teacher_LessonSerializer(lesson_themes,many=True,context=context)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'])
@@ -376,7 +420,8 @@ class Student_View(ModelViewSet):
             debts=get_model(conf.STUDENT_DEBT).objects.filter(student=instance,**filter_conditions)
         except ValidationError:
             return Response({"error":"Noto'g'ri qiymat"})
-        serializer=finserializer.StudentDebtSerializer(debts,many=True)
+        context=self.get_serializer_context()
+        serializer=finserializer.StudentDebtSerializer(debts,many=True,context=context)
         return Response(serializer.data)
     
     @action(detail=False, methods=['GET'])
@@ -384,17 +429,28 @@ class Student_View(ModelViewSet):
         instance = self.get_student()
         from finance import serializers as finserializer
         debts=get_model(conf.INCOME).objects.filter(student=instance)
-        serializer=finserializer.InComeSerializer(debts,many=True)
-        return Response(serializer.data)
-    
-    @action(detail=False, methods=['GET'])
-    def get_student_attendances(self, request):
-        from .serializers import AttendanceSerializer
-        instance = self.get_student()
-        attendances=get_model(conf.ATTENDANCE).objects.filter(user=instance)
-        serializer=AttendanceSerializer(attendances,many=True)
+        context=self.get_serializer_context()
+        serializer=finserializer.InComeSerializer(debts,many=True,context=context)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['GET'])
+    def get_student_attendances(self, request):
+        from school.serializers import AttendanceSerializer
+        instance = self.get_user()
+        attendances=get_model(conf.ATTENDANCE).objects.filter(user=instance)
+        context=self.get_serializer_context()
+        serializer=AttendanceSerializer(attendances,many=True,context=context)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['GET'])
+    def student_tasks(self, request):
+        from school import serializers as schoolser
+        instance = self.get_student()
+        tasks=instance.class_of_school.tasks.all()
+        context=self.get_serializer_context()
+        serializer=schoolser.TaskForClassSerializer(tasks,many=True,context=context)
+        return Response(serializer.data)
+    
     def update(self, request, *args, **kwargs):
         serializer=global_update(self, request, *args, **kwargs,model=conf.STUDENT,types=models.FileField)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -455,6 +511,16 @@ class Parent_View(ModelViewSet):
         if hasattr(parent,"children"):
             return parent.children.all()
         return 'ItHasNotChildren'
+    
+    @action(detail=False, methods=['GET'])
+    def get_children_list(self, request):
+        from .serializers import StudentSerializer
+        children=self.get_children()
+        if children!="ItHasNotChildren":
+            context=self.get_serializer_context()
+            serializer=StudentSerializer(children,many=True,context=context)
+            return Response(serializer.data)
+        return Response(children)
 
     @action(detail=False, methods=['GET'])
     def children_debts(self, request):
@@ -473,7 +539,8 @@ class Parent_View(ModelViewSet):
                     debts=get_model(conf.STUDENT_DEBT).objects.filter(student=instance,**filter_conditions)
                 except ValidationError:
                     return Response({"error":"Noto'g'ri qiymat"})
-                serializer=finserializer.StudentDebtSerializer(debts,many=True)
+                context=self.get_serializer_context()
+                serializer=finserializer.StudentDebtSerializer(debts,many=True,context=context)
                 data.append(serializer.data)
         return Response(data)
     
@@ -485,7 +552,8 @@ class Parent_View(ModelViewSet):
             for instance in children:
                 from finance import serializers as finserializer
                 debts=get_model(conf.INCOME).objects.filter(student=instance)
-                serializer=finserializer.InComeSerializer(debts,many=True)
+                context=self.get_serializer_context()
+                serializer=finserializer.InComeSerializer(debts,many=True,context=context)
                 data.append(serializer.data)
         return Response(data)
     
@@ -497,7 +565,8 @@ class Parent_View(ModelViewSet):
         if children!="ItHasNotChildren":
             for instance in children:
                 attendances=get_model(conf.ATTENDANCE).objects.filter(user=instance)
-                serializer=AttendanceSerializer(attendances,many=True)
+                context=self.get_serializer_context()
+                serializer=AttendanceSerializer(attendances,many=True,context=context)
                 data.append(serializer.data)
         return Response(data)
 
