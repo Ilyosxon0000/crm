@@ -48,7 +48,7 @@ class Attendance(models.Model):
         (KELGAN,'kelgan'),
     )
     attendance_type=models.CharField(choices=CHOICES_DAVOMAT,max_length=50,verbose_name="davomat turi:",default=SABABSIZ)
-    date=models.DateTimeField(blank=True, null=True)
+    date=models.DateTimeField(auto_now_add=True)
     date_leave = models.DateTimeField(auto_now=True)
     reason=models.TextField(blank=True,null=True,verbose_name="sabab(Agar sababli turida bo'lsa):")
 

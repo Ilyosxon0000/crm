@@ -10,6 +10,7 @@ class ScienceSerializer(serializers.ModelSerializer):
 
 class ClassSerializer(serializers.ModelSerializer):
     teacher_object=serializers.SerializerMethodField('get_teacher_dict')
+    room_name=serializers.SerializerMethodField('get_room_name')
     class Meta:
         model=get_model(conf.CLASS)
         fields="__all__"
@@ -21,6 +22,15 @@ class ClassSerializer(serializers.ModelSerializer):
         teacher = obj.teacher
         if teacher:
             serializer = TeacherSerializer(teacher, many=False, context=serializer_context)
+            return serializer.data
+        return None
+    
+    def get_room_name(self, obj):
+        request = self.context.get('request')
+        serializer_context = {'request': request }
+        room = obj.room
+        if room:
+            serializer = RoomSerializer(room, many=False, context=serializer_context)
             return serializer.data
         return None
 
@@ -177,3 +187,9 @@ class Teacher_LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model=get_model(conf.TEACHER_LESSON)
         fields="__all__"
+
+class CompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model=get_model(conf.COMPANY)
+        fields="__all__"
+

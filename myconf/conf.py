@@ -43,6 +43,7 @@ TASK="school.Task"#Task modeli
 TASK_FOR_CLASS="school.TaskForClass"#Davomat modeli
 PARENT_COMMENT="school.Parent_Comment"#Ota ona comment modeli
 TEACHER_LESSON="school.Teacher_Lesson"#Davomat modeli
+COMPANY="school.Company"#Davomat modeli
 
 def all_days():
     import datetime

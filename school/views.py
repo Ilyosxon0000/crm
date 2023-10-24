@@ -262,11 +262,8 @@ class LessonView(ModelViewSet):
         filename = fs.save(uploaded_file.name, uploaded_file)
         file_path = fs.path(filename)
         try:
-            # Use a database transaction for the following operations
             with transaction.atomic():
-                # Delete all records in the LESSON model
                 get_model(conf.LESSON).objects.all().delete()
-                # Process the uploaded Excel file
                 obj = AddLessonWithExcel(file_path)
                 obj.start()
         except Exception as e:
@@ -334,7 +331,6 @@ class TaskForClassView(ModelViewSet):
     serializer_class=serializers.TaskForClassSerializer
     filterset_fields="__all__"
     
-
 class Parent_CommentView(ModelViewSet):
     queryset=get_model(conf.PARENT_COMMENT).objects.all()
     serializer_class=serializers.Parent_CommentSerializer
@@ -366,6 +362,12 @@ class Parent_CommentView(ModelViewSet):
 class Teacher_LessonView(ModelViewSet):
     queryset=get_model(conf.TEACHER_LESSON).objects.all()
     serializer_class=serializers.Teacher_LessonSerializer
+
+class CompanyView(ModelViewSet):
+    queryset=get_model(conf.COMPANY).objects.all()
+    serializer_class=serializers.CompanySerializer
+
+
 
 # lesson class
 # def list(self, request, *args, **kwargs):

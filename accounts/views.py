@@ -58,8 +58,9 @@ def global_update(self, request, *args, **kwargs):
     many_to_many_fields = get_type_name_field(model,models.ManyToManyField)
     for i in many_to_many_fields:
         items=dict(request.data).get(i,False)
-        items=[eval(i) for i in items]
-        my_dict[i]=items
+        if items:
+            items=[eval(i) for i in items]
+            my_dict[i]=items
     serializer = self.get_serializer(instance, data=my_dict, partial=True)
     serializer.is_valid(raise_exception=True)
     self.perform_update(serializer)
@@ -103,6 +104,35 @@ class UserView(ModelViewSet):
             return Response({"exists": True}, status=status.HTTP_200_OK)
         else:
             return Response({"exists": False}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['GET'])
+    def to_tasks_users(self, request):
+        from school import serializers as schoolser
+        instance = self.get_user()
+        tasks=instance.to_tasks.all()
+        context=self.get_serializer_context()
+        serializer=schoolser.TaskSerializer(tasks,many=True,context=context)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['GET'])
+    def from_tasks_users(self, request):
+        from school import serializers as schoolser
+        instance = self.get_user()
+        tasks=instance.class_of_school.from_tasks.all()
+        context=self.get_serializer_context()
+        serializer=schoolser.TaskSerializer(tasks,many=True,context=context)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['GET'])
+    def get_salaries(self, request):
+        from myconf.conf import get_model
+        from myconf import conf
+        from finance import serializers as finser
+        instance = self.get_user()
+        salaries=get_model(conf.EXPENSE).objects.filter(user=instance)
+        serializer=finser.ExpenseSerializer(salaries,many=True)
+        return Response(serializer.data)
+
     @action(detail=False, methods=['GET'])
     def me(self, request):
         user=self.get_user()
@@ -182,8 +212,24 @@ class Permission_View(ModelViewSet):
         self.perform_destroy(instance)
         return Response({"success":"true"},status=status.HTTP_200_OK)
 
-@receiver(post_delete)
-def delete_user(sender, instance, **kwargs):
+@receiver(post_delete, sender=get_model(conf.ADMIN))
+def delete_admin(sender, instance, **kwargs):
+    if hasattr(instance, 'user'):
+        instance.user.delete()
+@receiver(post_delete, sender=get_model(conf.TEACHER))
+def delete_teacher(sender, instance, **kwargs):
+    if hasattr(instance, 'user'):
+        instance.user.delete()
+@receiver(post_delete, sender=get_model(conf.EMPLOYER))
+def delete_employer(sender, instance, **kwargs):
+    if hasattr(instance, 'user'):
+        instance.user.delete()
+@receiver(post_delete, sender=get_model(conf.STUDENT))
+def delete_student(sender, instance, **kwargs):
+    if hasattr(instance, 'user'):
+        instance.user.delete()
+@receiver(post_delete, sender=get_model(conf.PARENT))
+def delete_parent(sender, instance, **kwargs):
     if hasattr(instance, 'user'):
         instance.user.delete()
 
@@ -219,10 +265,9 @@ class Teacher_View(ModelViewSet):
     @action(detail=False, methods=['GET'])
     def teachers_for_class(self, request):
         queryset = self.filter_queryset(self.get_queryset())
-        teachers_with_classes = queryset.annotate(num_classes=Count('sinflar'))
         teachers=[]
-        for teacher in teachers_with_classes:
-            if teacher.num_classes == 0:
+        for teacher in queryset:
+            if hasattr(teacher,'sinf')!=True:
                 serializer = self.get_serializer(teacher, many=False)
                 teachers.append(serializer.data)
         return Response(teachers)
@@ -449,6 +494,14 @@ class Student_View(ModelViewSet):
         tasks=instance.class_of_school.tasks.all()
         context=self.get_serializer_context()
         serializer=schoolser.TaskForClassSerializer(tasks,many=True,context=context)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['GET'])
+    def get_lessons_of_student(self, request, pk=None):
+        from .serializers import Lesson_Serializer
+        instance = self.get_student().class_of_school
+        lessons=get_model(conf.LESSON).objects.filter(student_class=instance)
+        serializer=Lesson_Serializer(lessons,many=True)
         return Response(serializer.data)
     
     def update(self, request, *args, **kwargs):
