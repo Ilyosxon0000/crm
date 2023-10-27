@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'django_filters',
     'djoser',
+    'imagekit',
     # 'channels',
     'django_crontab',
 

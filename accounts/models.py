@@ -5,6 +5,8 @@ import datetime
 from django.utils.text import slugify
 from django.contrib.auth import get_user_model
 from myconf import conf
+from imagekit.models import ImageSpecField
+from imagekit.processors import Transpose
 
 class UserProfile(AbstractUser):
     def user_avatar_path(instance, filename):
@@ -13,6 +15,12 @@ class UserProfile(AbstractUser):
         return f"uploads/{instance.username}/avatar/{formatted_date}/{filename}"
     
     image=models.FileField(upload_to=user_avatar_path,verbose_name="Avatar uchun surat:",blank=True,null=True)
+    image_thumbnail=ImageSpecField(
+        source='image',
+        processors=[Transpose(),],
+        format='JPEG',
+        options={'quality':60}
+    )
     middle_name=models.CharField(max_length=255,verbose_name="Otasini ismi:",blank=True,null=True)
     type_user = models.CharField(max_length=255, blank=True, null=True,verbose_name="User turi:")
     unique_number = models.PositiveIntegerField(unique=True)
@@ -27,7 +35,7 @@ class UserProfile(AbstractUser):
                     self.unique_number = new_unique_number
                     break
                 i+=1
-        super(UserProfile, self).save(*args, **kwargs)
+        return super(UserProfile, self).save(*args, **kwargs)
     # TODO GENERATE 6 Numbers Random
 
     class Meta:
@@ -42,7 +50,7 @@ class Type_of_Admin(models.Model):
     
     def save(self, *args, **kwargs):
         self.slug=slugify(self.title)
-        super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural="Adminlar toifasi"
@@ -56,7 +64,7 @@ class Permission(models.Model):
     
     def save(self, *args, **kwargs):
         self.slug=slugify(self.title)
-        super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural="Adminlarga ruxsatnomalar"
@@ -74,7 +82,7 @@ class Admin(models.Model):
         self.user.type_user='admin'
         self.user.save()
         self.id=self.user.id
-        super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural="Adminlar"
@@ -171,7 +179,7 @@ class Teacher(models.Model):
         self.user.type_user='teacher'
         self.user.save()
         self.id = self.user.id
-        super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural="O'qituvchilar"
@@ -188,7 +196,7 @@ class Employer(models.Model):
         self.user.type_user='employer'
         self.user.save()
         self.id=self.user.id
-        super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural="Xodimlar"
@@ -229,13 +237,18 @@ class Student(models.Model):
     picture_3x4 = models.FileField(upload_to=student_picture_3x4_path, null=True, blank=True,verbose_name="3x4 rasm:")
     school_tab = models.FileField(upload_to=student_school_tab_path, null=True, blank=True,verbose_name="Maktabdan Tabel asli 2-11-sinflar uchun:")
     medical_book = models.FileField(upload_to=student_medical_book_path, blank=True, null=True,verbose_name="Tibbiy Daftarcha (086):")
-    # amount=models.IntegerField(default=0,verbose_name="hisobidagi pul miqdori:")
-    # latest_amount_date=models.DateTimeField(blank=True,null=True)
-    # amount_status=models.CharField(max_length=255,blank=True,null=True,choices=STATUS,verbose_name="hisobidagi pul miqdori turi:")
-    # if self.amount>=0:
-    #     self.amount_status=self.PAID
-    # else:
-    #     self.amount_status=self.NO_PAID
+    dicount=models.IntegerField(default=0)
+    
+    # TODO
+    # discount % percentage
+    # discount month
+    # discount %
+    # discount type
+    #   grant_full 12 month
+    #   grant_month 2 month
+    #   employer children 20 %
+    #   family children 10%
+    # hostel boolen
     
     def __str__(self):
         return f"student:{self.user.username}"
@@ -244,7 +257,7 @@ class Student(models.Model):
         self.user.type_user='student'
         self.user.save()
         self.id=self.user.id
-        super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural="O'quvchilar"
@@ -260,7 +273,7 @@ class Parent(models.Model):
         self.user.type_user='parent'
         self.user.save()
         self.id=self.user.id
-        super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural="Ota ona"
@@ -282,3 +295,13 @@ class Parent(models.Model):
     # medical_book = models.FileField(upload_to=teacher_medical_book_path, blank=True, null=True,verbose_name="Tibbiy Daftarcha (086):")
     # picture_3x4 = models.FileField(upload_to=teacher_picture_3x4_path, null=True, blank=True,verbose_name="3x4 rasm:")
     # lessons_file=models.FileField(upload_to=lessons_file_path, null=True, blank=True,verbose_name="dars jadvali:")
+
+
+"""
+
+cron 1 oyda 
+o'quvchi active bo'lsa
+Grantlarni tekshirish
+Yotoqxona
+
+"""

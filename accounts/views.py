@@ -577,9 +577,9 @@ class Parent_View(ModelViewSet):
 
     @action(detail=False, methods=['GET'])
     def children_debts(self, request):
-        data=[]
         children=self.get_children()
         if children!="ItHasNotChildren":
+            data=[]
             for instance in children:
                 from finance import serializers as finserializer
                 from django.core.exceptions import ValidationError
@@ -595,7 +595,8 @@ class Parent_View(ModelViewSet):
                 context=self.get_serializer_context()
                 serializer=finserializer.StudentDebtSerializer(debts,many=True,context=context)
                 data.append(serializer.data)
-        return Response(data)
+            return Response(data)
+        return Response(children)
     
     @action(detail=False, methods=['GET'])
     def children_pays(self, request):

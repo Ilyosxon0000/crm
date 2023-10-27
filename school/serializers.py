@@ -188,6 +188,40 @@ class Teacher_LessonSerializer(serializers.ModelSerializer):
         model=get_model(conf.TEACHER_LESSON)
         fields="__all__"
 
+class QuestionSerializer(serializers.ModelSerializer):
+    answer=serializers.Field(write_only=True)
+    option1=serializers.Field(write_only=True)
+    option2=serializers.Field(write_only=True)
+    option3=serializers.Field(write_only=True)
+    option4=serializers.Field(write_only=True)
+    options=serializers.SerializerMethodField(method_name="get_extra_info")
+    science=ScienceSerializer()
+    class Meta:
+        model=get_model(conf.QUESTION)
+        fields="__all__"
+
+    def __init__(self, *args, **kwargs):
+        super(QuestionSerializer, self).__init__(*args, **kwargs)
+        
+        is_teacher = (
+            self.context.get("request").user.type_user != "student" 
+            if self.context.get("request").user.is_authenticated and hasattr(self.context.get("request").user, 'type_user') 
+            else False
+        )
+        if is_teacher:
+            self.fields['answer']=serializers.CharField()
+
+    def get_extra_info(self, obj):
+            import random
+            options=[
+                obj.option1,
+                obj.option2,
+                obj.option3,
+                obj.option4,
+                ]
+            random.shuffle(options)
+            return options
+
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model=get_model(conf.COMPANY)

@@ -6,6 +6,8 @@ from django.contrib.auth import get_user_model
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(required=False, style={"input_type": "password"},write_only=True)
     type_user=serializers.ReadOnlyField()
+    is_active=serializers.ReadOnlyField()
+    image_thumbnail = serializers.ImageField(read_only=True)
     class Meta:
         model=get_user_model()
         fields=[
@@ -13,10 +15,12 @@ class UserSerializer(serializers.ModelSerializer):
             "username",
             "password",
             "image",
+            "image_thumbnail",
             "first_name",
             "last_name",
             "middle_name",
-            "type_user"
+            "type_user",
+            "is_active",
             ]
         extra_kwargs = {'password': {'write_only': True}}
       

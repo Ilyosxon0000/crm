@@ -20,6 +20,8 @@ from django.db.models import Count
 from django.core.files.storage import FileSystemStorage
 from django.db import transaction
 
+def get_user(request):
+    return request.user
 def get_all_weeks_of_current_year():
     current_year = datetime.datetime.now().year
     all_weeks = set()
@@ -362,6 +364,17 @@ class Parent_CommentView(ModelViewSet):
 class Teacher_LessonView(ModelViewSet):
     queryset=get_model(conf.TEACHER_LESSON).objects.all()
     serializer_class=serializers.Teacher_LessonSerializer
+
+class QuestionsView(ModelViewSet):
+    queryset=get_model(conf.QUESTION).objects.all()
+    serializer_class=serializers.QuestionSerializer
+
+    @action(methods=["POST"],detail=True)
+    def check_answer(self,request,pk=None):
+        # print(get_user(request))
+        answer=request.data.get("answer")
+        instance=self.get_object().answer
+        return Response({"answer":"correct" if answer==instance else "nocorrect"})
 
 class CompanyView(ModelViewSet):
     queryset=get_model(conf.COMPANY).objects.all()

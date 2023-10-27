@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from django.db import models
 from django.utils.text import slugify
 from myconf import conf
@@ -189,8 +190,28 @@ class Teacher_Lesson(models.Model):
     file_message=models.FileField(upload_to="uploads/message/%Y_%m_%d",blank=True,null=True)
     date=models.DateTimeField(blank=True,null=True)
 
+
+class Question(models.Model):
+    teacher=models.ForeignKey(get_model(conf.TEACHER),related_name="questions",on_delete=models.CASCADE)
+    science=models.ForeignKey(get_model(conf.SCIENCE),related_name="questions",on_delete=models.CASCADE)
+    question=models.TextField()
+    option1=models.CharField(max_length=255)
+    option2=models.CharField(max_length=255)
+    option3=models.CharField(max_length=255)
+    option4=models.CharField(max_length=255)
+    answer=models.CharField(max_length=255)
+    
 class Company(models.Model):
+    logo=models.FileField(upload_to="uploads/company_logo/%Y_%m_%d",blank=True,null=True)
     name=models.CharField(max_length=255,blank=True,null=True)
     begin_date=models.DateField(blank=True,null=True)
     end_date=models.DateField(blank=True,null=True)
     study_price=models.IntegerField(default=0)
+    hostel_price=models.IntegerField(default=0)
+    active=models.BooleanField(default=False)
+
+    def save(self,*args,**kwargs):
+        actives=Company.objects.filter(active=True)
+        if actives:
+            raise "Many active error"
+        return super().save(self,*args,**kwargs)
