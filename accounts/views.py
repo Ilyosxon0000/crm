@@ -104,7 +104,7 @@ class UserView(ModelViewSet):
             return Response({"exists": True}, status=status.HTTP_200_OK)
         else:
             return Response({"exists": False}, status=status.HTTP_200_OK)
-    
+
     @action(detail=False, methods=['GET'])
     def to_tasks_users(self, request):
         from school import serializers as schoolser
@@ -113,7 +113,7 @@ class UserView(ModelViewSet):
         context=self.get_serializer_context()
         serializer=schoolser.TaskSerializer(tasks,many=True,context=context)
         return Response(serializer.data)
-    
+
     @action(detail=False, methods=['GET'])
     def from_tasks_users(self, request):
         from school import serializers as schoolser
@@ -122,7 +122,7 @@ class UserView(ModelViewSet):
         context=self.get_serializer_context()
         serializer=schoolser.TaskSerializer(tasks,many=True,context=context)
         return Response(serializer.data)
-    
+
     @action(detail=False, methods=['GET'])
     def get_salaries(self, request):
         from myconf.conf import get_model
@@ -157,7 +157,7 @@ class UserView(ModelViewSet):
             serializer=self.get_serializer(user,many=False)
             return Response(serializer.data)
         return Response({"user":user})
-    
+
     @action(detail=False, methods=['GET'])
     def get_my_attendances(self, request):
         from .serializers import AttendanceSerializer
@@ -165,7 +165,7 @@ class UserView(ModelViewSet):
         attendances=get_model(conf.ATTENDANCE).objects.filter(user=instance)
         serializer=AttendanceSerializer(attendances,many=True)
         return Response(serializer.data)
-    
+
     @action(detail=True, methods=['GET'])
     def get_user_attendances(self, request,pk=None):
         from .serializers import AttendanceSerializer
@@ -173,7 +173,7 @@ class UserView(ModelViewSet):
         attendances=get_model(conf.ATTENDANCE).objects.filter(user=instance)
         serializer=AttendanceSerializer(attendances,many=True)
         return Response(serializer.data)
-    
+
     @action(detail=True, methods=['GET'])
     def change_active_to_passive(self, request,pk=None):
         user=self.get_object()
@@ -333,7 +333,7 @@ class Teacher_View(ModelViewSet):
             return Response({"message": "success"}, status=status.HTTP_200_OK)
         get_model(conf.TEACHER_LESSON).objects.create(teacher=instance,message=message)
         return Response({"message": "success"}, status=status.HTTP_200_OK)
-    
+
     @action(detail=False, methods=['POST'])
     def add_task_to_class(self, request):
         from school import serializers
@@ -344,7 +344,7 @@ class Teacher_View(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"message": "success"}, status=status.HTTP_200_OK)
-    
+
     @action(detail=False, methods=['GET'])
     def get_lesson_themes(self, request):
         from school.serializers import Teacher_LessonSerializer
@@ -367,7 +367,7 @@ class Teacher_View(ModelViewSet):
         response = FileResponse(open(file_path, 'rb'), content_type='application/octet-stream')
         response['Content-Disposition'] = f'attachment; filename="{instance.lessons_file.name}"'
         return response
-    
+
     @action(detail=False, methods=['GET'])
     def get_class_of_teacher(self, request):
         from school.serializers import ClassForTeacherSerializer
@@ -466,16 +466,16 @@ class Student_View(ModelViewSet):
         except ValidationError:
             return Response({"error":"Noto'g'ri qiymat"})
         context=self.get_serializer_context()
-        serializer=finserializer.StudentDebtSerializer(debts,many=True,context=context)
+        serializer=finserializer.StudentGetDebtSerializer(debts,many=True,context=context)
         return Response(serializer.data)
-    
+
     @action(detail=False, methods=['GET'])
     def student_pays(self, request):
         instance = self.get_student()
         from finance import serializers as finserializer
         debts=get_model(conf.INCOME).objects.filter(student=instance)
         context=self.get_serializer_context()
-        serializer=finserializer.InComeSerializer(debts,many=True,context=context)
+        serializer=finserializer.InComeGetSerializer(debts,many=True,context=context)
         return Response(serializer.data)
 
     @action(detail=False, methods=['GET'])
@@ -503,7 +503,7 @@ class Student_View(ModelViewSet):
         lessons=get_model(conf.LESSON).objects.filter(student_class=instance)
         serializer=Lesson_Serializer(lessons,many=True)
         return Response(serializer.data)
-    
+
     def update(self, request, *args, **kwargs):
         serializer=global_update(self, request, *args, **kwargs,model=conf.STUDENT,types=models.FileField)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -518,7 +518,6 @@ class Parent_View(ModelViewSet):
     serializer_class=serializers.ParentSerializer
 
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
         queryset = self.filter_queryset(self.get_queryset())
         instance = self.get_object()
         user=request.data['user']
@@ -544,13 +543,13 @@ class Parent_View(ModelViewSet):
         if getattr(instance, '_prefetched_objects_cache', None):
             instance._prefetched_objects_cache = {}
         return Response(serializer.data)
-    
+
     def get_user(self):
         from django.contrib.auth.models import AnonymousUser
         if type(self.request.user)==AnonymousUser:
             return "AnonymousUser"
         return self.request.user
-    
+
     def get_parent(self):
         from django.contrib.auth.models import AnonymousUser
         if type(self.request.user)!=AnonymousUser:
@@ -558,13 +557,13 @@ class Parent_View(ModelViewSet):
                 return self.request.user.parent
             return "ItIsNotParent"
         return "AnonymousUser"
-    
+
     def get_children(self):
         parent=self.get_parent()
         if hasattr(parent,"children"):
             return parent.children.all()
         return 'ItHasNotChildren'
-    
+
     @action(detail=False, methods=['GET'])
     def get_children_list(self, request):
         from .serializers import StudentSerializer
@@ -593,11 +592,11 @@ class Parent_View(ModelViewSet):
                 except ValidationError:
                     return Response({"error":"Noto'g'ri qiymat"})
                 context=self.get_serializer_context()
-                serializer=finserializer.StudentDebtSerializer(debts,many=True,context=context)
-                data.append(serializer.data)
+                serializer=finserializer.StudentGetDebtSerializer(debts,many=True,context=context)
+                data+=serializer.data
             return Response(data)
         return Response(children)
-    
+
     @action(detail=False, methods=['GET'])
     def children_pays(self, request):
         data=[]
@@ -607,18 +606,18 @@ class Parent_View(ModelViewSet):
                 from finance import serializers as finserializer
                 debts=get_model(conf.INCOME).objects.filter(student=instance)
                 context=self.get_serializer_context()
-                serializer=finserializer.InComeSerializer(debts,many=True,context=context)
-                data.append(serializer.data)
+                serializer=finserializer.InComeGetSerializer(debts,many=True,context=context)
+                data+=serializer.data
         return Response(data)
-    
+
     @action(detail=False, methods=['GET'])
     def get_children_attendances(self, request):
-        from .serializers import AttendanceSerializer
+        from school.serializers import AttendanceSerializer
         data=[]
         children=self.get_children()
         if children!="ItHasNotChildren":
             for instance in children:
-                attendances=get_model(conf.ATTENDANCE).objects.filter(user=instance)
+                attendances=get_model(conf.ATTENDANCE).objects.filter(user=instance.user)
                 context=self.get_serializer_context()
                 serializer=AttendanceSerializer(attendances,many=True,context=context)
                 data.append(serializer.data)

@@ -1,4 +1,5 @@
 import random
+from typing import Any
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 import datetime
@@ -36,7 +37,6 @@ class UserProfile(AbstractUser):
                     break
                 i+=1
         return super(UserProfile, self).save(*args, **kwargs)
-    # TODO GENERATE 6 Numbers Random
 
     class Meta:
         verbose_name_plural="Foydalanuvchilar"
@@ -201,6 +201,31 @@ class Employer(models.Model):
     class Meta:
         verbose_name_plural="Xodimlar"
 
+class StudentManager(models.Manager):
+    def create(self, **kwargs: Any) -> Any:
+        data={
+                "FAMILY_CHILDREN":{
+                    'discount': 10,
+                    'discount_month': 12,
+                },
+                "EMPLOYER_CHILDREN":{
+                    'discount': 20,
+                    'discount_month': 12,
+                },
+                "GRANT_FULL":{
+                    'discount': 100,
+                    'discount_month': 12,
+                },
+                "GRANT_MONTH":{
+                    'discount': 100,
+                    'discount_month': 2,
+                },
+            }
+        discount=data[kwargs['discount_type']]
+        kwargs['discount']=discount['discount']
+        kwargs['discount_month']=discount['discount_month']
+        return super().create(**kwargs)
+
 class Student(models.Model):
     def student_id_card_parents_path(instance, filename):
         current_date = datetime.datetime.now()
@@ -222,11 +247,11 @@ class Student(models.Model):
         formatted_date = current_date.strftime("%Y_%m_%d")
         return f"uploads/teachers/{instance.user.username}/medical_book/{formatted_date}/{filename}"
 
-    PAID="PAID"
-    NO_PAID="NO_PAID"#DID not paid
-    STATUS=(
-        (PAID,"to'lagan"),
-        (NO_PAID,"to'lamagan")
+    DISCOUNT_TYPE=(
+        ("GRANT_FULL","GRANT_FULL"),
+        ("GRANT_MONTH","GRANT_MONTH"),
+        ("EMPLOYER_CHILDREN","EMPLOYER_CHILDREN"),
+        ("FAMILY_CHILDREN","FAMILY_CHILDREN"),
     )
 
     user = models.OneToOneField(get_user_model(), related_name='student', on_delete=models.CASCADE)
@@ -237,18 +262,11 @@ class Student(models.Model):
     picture_3x4 = models.FileField(upload_to=student_picture_3x4_path, null=True, blank=True,verbose_name="3x4 rasm:")
     school_tab = models.FileField(upload_to=student_school_tab_path, null=True, blank=True,verbose_name="Maktabdan Tabel asli 2-11-sinflar uchun:")
     medical_book = models.FileField(upload_to=student_medical_book_path, blank=True, null=True,verbose_name="Tibbiy Daftarcha (086):")
-    dicount=models.IntegerField(default=0)
-    
-    # TODO
-    # discount % percentage
-    # discount month
-    # discount %
-    # discount type
-    #   grant_full 12 month
-    #   grant_month 2 month
-    #   employer children 20 %
-    #   family children 10%
-    # hostel boolen
+    hostel=models.BooleanField(default=False)
+    discount=models.IntegerField(default=0)
+    discount_month=models.IntegerField(default=0)
+    discount_type=models.CharField(max_length=20,choices=DISCOUNT_TYPE,blank=True,null=True)
+    objects=StudentManager()
     
     def __str__(self):
         return f"student:{self.user.username}"

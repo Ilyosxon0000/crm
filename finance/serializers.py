@@ -8,6 +8,12 @@ class StudentDebtSerializer(serializers.ModelSerializer):
         model=get_model(conf.STUDENT_DEBT)
         fields="__all__"
 
+class StudentGetDebtSerializer(serializers.ModelSerializer):
+    student=acser.StudentSerializer(read_only=True)
+    class Meta:
+        model=get_model(conf.STUDENT_DEBT)
+        fields="__all__"
+
 class InComeSerializer(serializers.ModelSerializer):
     # student=acser.StudentSerializer(read_only=True)
     class Meta:

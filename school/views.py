@@ -371,7 +371,6 @@ class QuestionsView(ModelViewSet):
 
     @action(methods=["POST"],detail=True)
     def check_answer(self,request,pk=None):
-        # print(get_user(request))
         answer=request.data.get("answer")
         instance=self.get_object().answer
         return Response({"answer":"correct" if answer==instance else "nocorrect"})

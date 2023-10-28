@@ -138,11 +138,9 @@ class Grade(models.Model):
     )
     student=models.ForeignKey(conf.STUDENT,related_name="grades",on_delete=models.CASCADE)
     lesson=models.ForeignKey(conf.LESSON,related_name='grades',on_delete=models.CASCADE)
-    grade_datetime=models.DateTimeField(blank=True,null=True)
+    datetime=models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
-        if self.grade_datetime!=True:
-            self.grade_datetime = conf.get_date("current_date")
         super().save(*args, **kwargs)
 
     class Meta:

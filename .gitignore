@@ -1,3 +1,5 @@
 venv
 main.php
 main.py
+passenger_settings.py
+passenger_wsgi.py
