@@ -2,6 +2,8 @@ from rest_framework import serializers
 from myconf.conf import get_model
 from myconf import conf
 from django.contrib.auth import get_user_model
+import os
+from django.conf import settings
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(required=False, style={"input_type": "password"},write_only=True)
@@ -30,6 +32,24 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+    
+class UserForFaceIDSerializer(serializers.ModelSerializer):
+    is_active=serializers.ReadOnlyField()
+    class Meta:
+        model=get_user_model()
+        fields=[
+            "id",
+            "username",
+            "image",
+            "is_active",
+            ]
+    def to_representation(self, instance):
+        data = super(UserForFaceIDSerializer, self).to_representation(instance)
+        if instance.image and instance.is_active:
+            full_path = os.path.join(settings.MEDIA_ROOT, str(instance.image))
+            data['image_full_path'] = full_path
+        return data
+      
 
 class Type_of_Admin_Serializer(serializers.ModelSerializer):
     class Meta:

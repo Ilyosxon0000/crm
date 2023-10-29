@@ -1,4 +1,3 @@
-from collections.abc import Iterable
 from django.db import models
 from django.utils.text import slugify
 from myconf import conf
@@ -6,7 +5,7 @@ from django.contrib.auth import get_user_model
 import json
 from django.core.exceptions import ValidationError
 from myconf.conf import get_model
-from django.db.models import Case, When, Value
+from typing import Any
 
 class Science(models.Model):
     title=models.CharField(max_length=255)
@@ -198,6 +197,13 @@ class Question(models.Model):
     option3=models.CharField(max_length=255)
     option4=models.CharField(max_length=255)
     answer=models.CharField(max_length=255)
+
+class CompanyManager(models.Manager):
+    def create(self, **kwargs):
+        actives=Company.objects.filter(active=True)
+        if actives and kwargs['active']:
+            raise "Many active error"
+        return super().create(**kwargs)
     
 class Company(models.Model):
     logo=models.FileField(upload_to="uploads/company_logo/%Y_%m_%d",blank=True,null=True)
@@ -207,9 +213,6 @@ class Company(models.Model):
     study_price=models.IntegerField(default=0)
     hostel_price=models.IntegerField(default=0)
     active=models.BooleanField(default=False)
-
-    def save(self,*args,**kwargs):
-        actives=Company.objects.filter(active=True)
-        if actives:
-            raise "Many active error"
-        return super().save(self,*args,**kwargs)
+    camera_entrance=models.URLField(blank=True,null=True)
+    camera_exit=models.URLField(blank=True,null=True)
+    objects=CompanyManager()

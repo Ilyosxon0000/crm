@@ -20,7 +20,6 @@ def global_update(self, request, *args, **kwargs):
     queryset = self.filter_queryset(self.get_queryset())
     instance = self.get_object()
     data = request.data
-    # print(data['user.first_name'])
     if data.get('user.username',False):
         queryset = queryset.filter(user__username=data['user.username'])
         if len(queryset)!=True:
@@ -104,6 +103,13 @@ class UserView(ModelViewSet):
             return Response({"exists": True}, status=status.HTTP_200_OK)
         else:
             return Response({"exists": False}, status=status.HTTP_200_OK)
+        
+    @action(detail=False, methods=['GET'])
+    def list_for_face_id(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        context=self.get_serializer_context()
+        serializer = serializers.UserForFaceIDSerializer(queryset, many=True,context=context)
+        return Response(serializer.data)
 
     @action(detail=False, methods=['GET'])
     def to_tasks_users(self, request):
@@ -487,6 +493,14 @@ class Student_View(ModelViewSet):
         serializer=AttendanceSerializer(attendances,many=True,context=context)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['GET'])
+    def student_grades(self, request):
+        from school import serializers as schoolser
+        instance = self.get_student()
+        grades=instance.grades.all()
+        serializer=schoolser.Grade_Serializer(grades,many=True)
+        return Response(serializer.data)
+    
     @action(detail=False, methods=['GET'])
     def student_tasks(self, request):
         from school import serializers as schoolser
