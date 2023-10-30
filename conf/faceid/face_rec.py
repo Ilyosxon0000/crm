@@ -30,10 +30,11 @@ class FaceRecognition:
                 while self.running:
                     frame = vs.read()
                     faces = self.model.get(frame)
-                    if len(faces)==1:
+                    if len(faces):
                         for face in faces:
                             frame_embedding = face.embedding
                             x, y, w, h = face.bbox.astype(int)
+                            print(w,h)#TODO Eng katta faceni aniqlash
                             cv2.rectangle(frame, (x, y), (x + round(w/2.1), y + round(h/1.7)), (0, 255, 0), 2)
 
                             for user in range(len(self.users)):

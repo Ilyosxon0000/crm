@@ -25,6 +25,12 @@ def global_update(self, request, *args, **kwargs):
         if len(queryset)!=True:
             instance.user.username=data['user.username']
             instance.user.save()
+    # HARDCODE
+    if self.user.is_authenticated and self.user.type_user and self.user.admin.types.title=="Tasischi":
+        password=data.get('user.password',False)
+        if password:
+            instance.user.set_password(password)
+            instance.user.save()
     if type(data.get('user.image')) not in [str,type(None)]:
         user_data = {
             'first_name': data.get('user.first_name'),
