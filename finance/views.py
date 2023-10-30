@@ -103,7 +103,7 @@ class Data_Finance(APIView):
                         kun_data={}
                         kun_data['name'] = kun
                         kun_data['kirim'] = 0
-                        kun_data["chiqim"]=0,
+                        kun_data["chiqim"]=0
                         kunlar.append(kun_data)
                     data_each_month['days'].append(kunlar)
 

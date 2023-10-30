@@ -11,7 +11,7 @@ from django.urls import path
 
 urlpatterns = [
     path("general_statistics/",views.General_Statistics.as_view()),
-    path("data/",finviews.Data_Finance.as_view())
+    path("finance/data/",finviews.Data_Finance.as_view())
 ]
 
 urlpatterns+=router.urls

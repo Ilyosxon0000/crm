@@ -48,6 +48,7 @@ class Expense(models.Model):
     updated_date=models.DateField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        if self.user.type_user in ["student","parent"]:
-            return EmployerTypeError()
+        if self.user:
+            if self.user.type_user in ["student","parent"]:
+                return EmployerTypeError()
         super().save(*args, **kwargs)

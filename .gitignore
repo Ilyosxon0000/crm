@@ -1,5 +1,7 @@
 venv
 main.php
 main.py
+db.sqlite3
 passenger_settings.py
 passenger_wsgi.py
+/media

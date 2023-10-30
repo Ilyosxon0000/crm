@@ -69,6 +69,12 @@ def student_debts(request):
         study_price=company.study_price
         hostel_price=company.hostel_price
         for student in students:
+            debts=get_model(conf.STUDENT_DEBT).objects.filter(
+                student=student,
+                paid=False,
+            )
+            print(debts)
+            # TODO Qarzdorlik sms
             if student.hostel:
                 price=study_price+hostel_price
                 check_discount(study_price=study_price,student=student,price=price)
