@@ -358,7 +358,7 @@ class Teacher_View(ModelViewSet):
         return Response({"message": "success","data":serializer.data}, status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['PUT'])
-    def add_task_to_class(self, request,pk=None):
+    def update_task_to_class(self, request,pk=None):
         from school import serializers
         instance=self.get_teacher()
         data=request.data
@@ -370,7 +370,7 @@ class Teacher_View(ModelViewSet):
         return Response({"message": "success","data":serializer.data}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['DELETE'])
-    def add_task_to_class(self, request,pk=None):
+    def delete_task_to_class(self, request,pk=None):
         get_model(conf.TASK_FOR_CLASS).objects.get(id=pk).delete()
         return Response({"message": "success"}, status=status.HTTP_200_OK)
 
