@@ -640,7 +640,7 @@ class Parent_View(ModelViewSet):
                 attendances=get_model(conf.ATTENDANCE).objects.filter(user=instance.user)
                 context=self.get_serializer_context()
                 serializer=AttendanceSerializer(attendances,many=True,context=context)
-                data.append(serializer.data)
+                data+=serializer.data
         return Response(data)
 
     def destroy(self, request, *args, **kwargs):

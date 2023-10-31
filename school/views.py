@@ -155,7 +155,7 @@ class ClassView(ModelViewSet):
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 
-class AttendanceView(ModelViewSet):
+class AttendanceView(ModelViewSet):#TODO PUT method date
     queryset=get_model(conf.ATTENDANCE).objects.all()
     serializer_class=serializers.AttendanceSerializer
     filterset_class = AttendanceFilter
