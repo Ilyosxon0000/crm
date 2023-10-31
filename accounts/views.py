@@ -355,6 +355,23 @@ class Teacher_View(ModelViewSet):
         serializer=serializers.TaskForClassSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        return Response({"message": "success","data":serializer.data}, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['PUT'])
+    def update_task_to_class(self, request,pk=None):
+        from school import serializers
+        instance=self.get_teacher()
+        data=request.data
+        task=get_model(conf.TASK_FOR_CLASS).objects.get(id=pk)
+        data["from_teacher"]=instance.id
+        serializer=serializers.TaskForClassSerializer(task,data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"message": "success","data":serializer.data}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['DELETE'])
+    def delete_task_to_class(self, request,pk=None):
+        get_model(conf.TASK_FOR_CLASS).objects.get(id=pk).delete()
         return Response({"message": "success"}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'])
@@ -640,7 +657,7 @@ class Parent_View(ModelViewSet):
                 attendances=get_model(conf.ATTENDANCE).objects.filter(user=instance.user)
                 context=self.get_serializer_context()
                 serializer=AttendanceSerializer(attendances,many=True,context=context)
-                data+=serializer.data
+                data.append(serializer.data)
         return Response(data)
 
     def destroy(self, request, *args, **kwargs):
