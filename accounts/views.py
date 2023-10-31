@@ -355,6 +355,23 @@ class Teacher_View(ModelViewSet):
         serializer=serializers.TaskForClassSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        return Response({"message": "success","data":serializer.data}, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=['PUT'])
+    def add_task_to_class(self, request,pk=None):
+        from school import serializers
+        instance=self.get_teacher()
+        data=request.data
+        task=get_model(conf.TASK_FOR_CLASS).objects.get(id=pk)
+        data["from_teacher"]=instance.id
+        serializer=serializers.TaskForClassSerializer(task,data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"message": "success","data":serializer.data}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['DELETE'])
+    def add_task_to_class(self, request,pk=None):
+        get_model(conf.TASK_FOR_CLASS).objects.get(id=pk).delete()
         return Response({"message": "success"}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['GET'])
