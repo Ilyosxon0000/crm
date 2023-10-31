@@ -1,7 +1,2 @@
 venv
 main.py
-db.sqlite3
-media
-conf/faceid/
-media
-db.sqlite3

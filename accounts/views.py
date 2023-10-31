@@ -352,7 +352,8 @@ class Teacher_View(ModelViewSet):
         instance=self.get_teacher()
         data=request.data
         data["from_teacher"]=instance.id
-        serializer=serializers.TaskForClassSerializer(data=data)
+        context=self.get_serializer_context()
+        serializer=serializers.TaskForClassSerializer(data=data,context=context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"message": "success","data":serializer.data}, status=status.HTTP_200_OK)
@@ -364,7 +365,8 @@ class Teacher_View(ModelViewSet):
         data=request.data
         task=get_model(conf.TASK_FOR_CLASS).objects.get(id=pk)
         data["from_teacher"]=instance.id
-        serializer=serializers.TaskForClassSerializer(task,data=data)
+        context=self.get_serializer_context()
+        serializer=serializers.TaskForClassSerializer(task,data=data,context=context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"message": "success","data":serializer.data}, status=status.HTTP_200_OK)

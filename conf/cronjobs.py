@@ -87,8 +87,6 @@ def student_debts(request):
 @authentication_classes([SessionAuthentication])  # Use SessionAuthentication for authentication
 @permission_classes([IsAuthenticated])  # Require users to be authenticated
 def set_assets(request):
-    from accounts import serializers as acser
-    from school import serializers as schoolser
     json_path=os.path.join(settings.STATICFILES_DIRS_CUSTOM,'data.json')
 
     with open(json_path, 'r') as file:
@@ -105,5 +103,16 @@ def set_assets(request):
     classes=json_data['classes']
     for class_of_school in classes:
         get_model(conf.CLASS).objects.get_or_create(title=class_of_school['title'])
+
+    companies=json_data['companies']
+    for company in companies:
+        get_model(conf.COMPANY).objects.get_or_create(
+            begin_date=company['begin_date'],
+            end_date=company['end_date'],
+            study_price=company['study_price'],
+            hostel_price=company['hostel_price'],
+            camera_entrance=company['camera_entrance'],
+            camera_exit=company['camera_exit']
+        )
 
     return Response({"message": "succesfully"})

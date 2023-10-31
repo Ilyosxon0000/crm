@@ -199,21 +199,12 @@ class Question(models.Model):
     option4=models.CharField(max_length=255)
     answer=models.CharField(max_length=255)
 
-class CompanyManager(models.Manager):
-    def create(self, **kwargs):
-        actives=Company.objects.filter(active=True)
-        if actives and kwargs['active']:
-            raise "Many active error"
-        return super().create(**kwargs)
-    
 class Company(models.Model):
     logo=models.FileField(upload_to="uploads/company_logo/%Y_%m_%d",blank=True,null=True)
-    name=models.CharField(max_length=255,blank=True,null=True)
+    # name=models.CharField(max_length=255,blank=True,null=True)
     begin_date=models.DateField(blank=True,null=True)
     end_date=models.DateField(blank=True,null=True)
     study_price=models.IntegerField(default=0)
     hostel_price=models.IntegerField(default=0)
-    active=models.BooleanField(default=False)
     camera_entrance=models.URLField(blank=True,null=True)
     camera_exit=models.URLField(blank=True,null=True)
-    objects=CompanyManager()

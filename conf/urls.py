@@ -3,7 +3,7 @@ from django.urls import path,include
 from django.conf import settings
 from django.conf.urls.static import static
 
-# from .faceid import camera
+from .faceid import camera
 
 from . import cronjobs
 
@@ -28,7 +28,7 @@ urlpatterns = [
    path('api/v1/cron/davomat_user/',cronjobs.davomat_users),
    path('api/v1/cron/student_debts/',cronjobs.student_debts),
    path('api/v1/cron/set_assets/',cronjobs.set_assets),
-   # path('api/v1/cam/<int:pk>/',camera.cam),
+   path('api/v1/cam/<int:pk>/',camera.cam),
    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]+static(settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
