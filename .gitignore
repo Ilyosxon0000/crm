@@ -2,4 +2,4 @@ venv
 main.py
 db.sqlite3
 media
-conf/faceid
+conf/faceid/

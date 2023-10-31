@@ -3,7 +3,6 @@ import cv2
 from imutils.video import VideoStream
 from sklearn.metrics.pairwise import cosine_similarity
 
-
 model = insightface.app.FaceAnalysis()
 model.prepare(ctx_id=0)
 src="http://192.168.1.143:4747/video"
