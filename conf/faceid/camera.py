@@ -1,20 +1,21 @@
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
-from . import face_rec
+from .face_rec import FaceRecognition
 from rest_framework.decorators import api_view
 from myconf.conf import get_model
 from myconf import conf
 from datetime import datetime
 from django.utils import timezone
+
 def cam_entrance(request,users):
-    camera=get_model(conf.COMPANY).objects.filter(active=True)
+    camera=get_model(conf.COMPANY).objects.all()
     camera=camera[0].camera_entrance if camera else None
     if camera:
         try:
             response=0
-            cam1=face_rec.FaceRecognition(users=users,similarity=0.5,limit=5)
+            cam1=FaceRecognition(users=users,similarity=0.5,limit=5)
             result=cam1.start(camera=camera)
-            print(result)
+            print("result:",result)
             if 'result' in result:
                 if result['result']:
                     message=result['message']
@@ -43,9 +44,8 @@ def cam_exit(request,users):
     if camera:
         try:
             response=0
-            cam1=face_rec.FaceRecognition(users=users,similarity=0.5,limit=5)
+            cam1=FaceRecognition(users=users,similarity=0.5,limit=5)
             result=cam1.start(camera=camera)
-            print(result)
             if 'result' in result:
                 if result['result']:
                     message=result['message']

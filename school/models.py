@@ -136,6 +136,7 @@ class Grade(models.Model):
         choices=GRADE_CHOICES,
         default=1
     )
+    teacher=models.ForeignKey(conf.TEACHER,related_name="grades",on_delete=models.CASCADE)
     student=models.ForeignKey(conf.STUDENT,related_name="grades",on_delete=models.CASCADE)
     lesson=models.ForeignKey(conf.LESSON,related_name='grades',on_delete=models.CASCADE)
     datetime=models.DateTimeField(auto_now_add=True)
@@ -191,6 +192,7 @@ class Teacher_Lesson(models.Model):
 
 class Question(models.Model):
     teacher=models.ForeignKey(get_model(conf.TEACHER),related_name="questions",on_delete=models.CASCADE)
+    #TODO
     science=models.ForeignKey(get_model(conf.SCIENCE),related_name="questions",on_delete=models.CASCADE)
     question=models.TextField()
     option1=models.CharField(max_length=255)

@@ -8,7 +8,8 @@ class FaceRecognition:
         self.users=users
         self.similarity=similarity
         self.running = True
-        self.limit=limit
+        self.limit1=limit
+        self.limit2=limit
     def check_camera(self,camera):
         try:
             cap = cv2.VideoCapture(camera)
@@ -30,12 +31,21 @@ class FaceRecognition:
                 while self.running:
                     frame = vs.read()
                     faces = self.model.get(frame)
+                    current_faces=[]
                     if len(faces):
                         for face in faces:
                             frame_embedding = face.embedding
                             x, y, w, h = face.bbox.astype(int)
-                            print(w,h)#TODO Eng katta faceni aniqlash
-                            cv2.rectangle(frame, (x, y), (x + round(w/2.1), y + round(h/1.7)), (0, 255, 0), 2)
+                            # print(face)
+                            un_face={
+                                "x":x,
+                                "y":y,
+                                "w":w,
+                                "h":h,
+                                "face":frame_embedding
+                            }
+                            current_faces.append(un_face)
+                            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
                             for user in range(len(self.users)):
                                 src=self.users[user]
@@ -45,7 +55,6 @@ class FaceRecognition:
                                     src_face = src_faces[0]
                                     src_embedding = src_face.embedding
                                 else:
-                                    print("No face detected in the source image")
                                     src_embedding = None
                                 if src_embedding is not None:
                                     similarity = cosine_similarity([src_embedding], [frame_embedding])[0][0]
@@ -58,14 +67,15 @@ class FaceRecognition:
                                         cv2.putText(frame, src['username'], text_position, font, font_scale, font_color, font_thickness)
                                         cv2.imwrite("./output.jpg", frame)
                                         return {"message":src,"result":True}
-                                    elif user+1==len(self.users) and self.limit==0:
-                                        return None
-                                    self.limit-=1
+                                    if user+1==len(self.users) and self.limit1==0:
+                                        return {"message":"Not known"}
+                                    self.limit1-=1
                                 else:
                                     return {"message":"src_embedding is None"}
-                    elif len(faces)>1 and self.limit==0:
-                        return None
-                    self.limit-=1
+                    elif len(faces)==False and self.limit2==0:
+                        return {"message":"face hasn't"}
+                    self.limit2-=1
+                    print(current_faces)
             except KeyboardInterrupt:
                 pass
             finally:

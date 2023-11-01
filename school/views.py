@@ -375,6 +375,8 @@ class QuestionsView(ModelViewSet):
         instance=self.get_object().answer
         return Response({"answer":"correct" if answer==instance else "nocorrect"})
 
+
+
 class CompanyView(ModelViewSet):
     queryset=get_model(conf.COMPANY).objects.all()
     serializer_class=serializers.CompanySerializer

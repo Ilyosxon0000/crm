@@ -10,6 +10,7 @@ from rest_framework.response import Response
 class StudentDebtView(ModelViewSet):
     queryset=get_model(conf.STUDENT_DEBT).objects.all()
     serializer_class=serializers.StudentDebtSerializer
+    filterset_fields="__all__"
 
 class InComeView(ModelViewSet):
     queryset=get_model(conf.INCOME).objects.all()
@@ -30,6 +31,8 @@ class Data_Finance(APIView):
         import calendar
         from django.db.models import Sum
         from .models import InCome,Expense
+        if (len(InCome.objects.all()) and len(Expense.objects.all()))==False:
+            return Response([])#TODO      from First Element to current month
         last_income=InCome.objects.latest('created_date')
         first_income=InCome.objects.earliest('created_date')
         last_expense=Expense.objects.latest('created_date')

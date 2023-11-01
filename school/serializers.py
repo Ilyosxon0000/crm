@@ -195,7 +195,8 @@ class QuestionSerializer(serializers.ModelSerializer):
     option3=serializers.Field(write_only=True)
     option4=serializers.Field(write_only=True)
     options=serializers.SerializerMethodField(method_name="get_extra_info")
-    science=ScienceSerializer()
+    science_name=serializers.CharField(source="science.title")
+    # science_name=serializers.CharField(source="science.title")
     class Meta:
         model=get_model(conf.QUESTION)
         fields="__all__"
