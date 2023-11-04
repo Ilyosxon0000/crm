@@ -177,7 +177,6 @@ class Parent_CommentSerializer(serializers.ModelSerializer):
     
     def to_representation(self, instance):
         objs = super(Parent_CommentSerializer, self).to_representation(instance)
-        # print(objs['admin'])
         objs['type'] = "question"
         if objs['admin']:
             objs['type'] = "answer"

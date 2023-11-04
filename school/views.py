@@ -338,22 +338,57 @@ class Parent_CommentView(ModelViewSet):
     serializer_class=serializers.Parent_CommentSerializer
     filterset_fields="__all__"
 
+    @action(detail=False,methods=['GET'])
+    def list_comments(self,request):
+        user=self.request.user
+        if user.is_authenticated:
+            if user.type_user=="parent":
+                queryset = self.filter_queryset(self.get_queryset()).filter(parent=user.id)
+                serializer = self.get_serializer(queryset, many=True)
+                return Response(serializer.data)
+        return Response({"error":"auth"})
+
+    @action(detail=False,methods=['POST'])
+    def add_comment(self,request):
+        user=self.request.user
+        data=dict(request.data)
+        if user.is_authenticated:
+            if user.type_user=="admin":
+                data['admin']=user.id
+                serializer=self.get_serializer(data=data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                headers = self.get_success_headers(serializer.data)
+                queryset = self.filter_queryset(self.get_queryset()).filter(parent=data['parent'])
+                serializer = self.get_serializer(queryset, many=True)
+            elif user.type_user=="parent":
+                data['parent']=user.id
+                serializer=self.get_serializer(data=data)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                headers = self.get_success_headers(serializer.data)
+                queryset = self.filter_queryset(self.get_queryset()).filter(parent=user.id)
+                serializer = self.get_serializer(queryset, many=True)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        else:
+            return Response({"error":"auth"})
+    
     @action(detail=False, methods=['GET'])
     def get_with_parent(self, request):
-        # queryset = self.filter_queryset(self.get_queryset())
         parents=get_model(conf.PARENT).objects.all()
         data=[]
+        context=self.get_serializer_context()
         for parent in parents:
             if parent.parent_comments.exists():
-                pser=acserializers.ParentSerializer(parent,many=False)
-                msgser=serializers.Parent_CommentSerializer(parent.parent_comments,many=True)
+                pser=acserializers.ParentSerializer(parent,many=False,context=context)
+                msgser=serializers.Parent_CommentSerializer(parent.parent_comments,many=True,context=context)
                 data.append({
                     "parent":pser.data,
                     "messages":msgser.data,
                     "chat":True
                 })
             else:
-                pser=acserializers.ParentSerializer(parent,many=False)
+                pser=acserializers.ParentSerializer(parent,many=False,context=context)
                 data.append({
                     "parent":pser.data,
                     "messages":[],

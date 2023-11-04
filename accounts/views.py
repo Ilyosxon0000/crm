@@ -26,7 +26,7 @@ def global_update(self, request, *args, **kwargs):
             instance.user.username=data['user.username']
             instance.user.save()
     # HARDCODE
-    if self.user.is_authenticated and self.user.type_user and self.user.admin.types.title=="Tasischi":
+    if self.request.user.is_authenticated and self.request.user.type_user and self.request.user.admin.types.title=="Tasischi":
         password=data.get('user.password',False)
         if password:
             instance.user.set_password(password)
@@ -283,6 +283,7 @@ class Teacher_View(ModelViewSet):
                 serializer = self.get_serializer(teacher, many=False)
                 teachers.append(serializer.data)
         return Response(teachers)
+    
     @swagger_auto_schema(
         operation_summary="Upload a single file.",
         operation_description="Upload a single file using multipart/form-data.",

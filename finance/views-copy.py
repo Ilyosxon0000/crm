@@ -1,4 +1,3 @@
-from datetime import datetime
 from rest_framework.viewsets import ModelViewSet
 from myconf.conf import get_model
 from myconf import conf
@@ -41,20 +40,14 @@ class Data_Finance(APIView):
         first_object=int(first_income.created_date.year) if int(first_income.created_date.year)<int(first_expense.created_date.year) else int(first_expense.created_date.year)
         last_object=int(last_income.created_date.year) if int(last_income.created_date.year)>int(last_expense.created_date.year) else int(last_expense.created_date.year)
 
-        current_date=datetime.now()
         years=[i for i in range(first_object,last_object+1)]
         data = {}
-        for year in range(len(years)):
-            s=years[year]
+        for s in years:
             li = []
             for x in range(1, 13):
-                if year+1==len(years) and x>current_date.month:
-                    break
                 a, m = calendar.monthrange(s, x)
                 li.append(m)
             z = list(zip(range(1, 13), li))
-            if year+1==len(years):
-                z = list(zip(range(1, current_date.month+1), li))
             if s not in data.keys():
                 data[s] = z
         

@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 from django.db import models
 from myconf.conf import get_user_model
 from myconf import conf
@@ -12,6 +13,11 @@ class Student_Debt(models.Model):
     paid=models.BooleanField(default=False)
     created_date=models.DateField(auto_now_add=True)
     updated_date=models.DateField(auto_now=True)
+
+    def save(self,*args,**kwargs):
+        if self.balance>=0:
+            self.paid=True
+        return super().save(*args,**kwargs)
 
 # This class is in come
 class InCome(models.Model):
