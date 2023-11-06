@@ -140,7 +140,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 if DEPLOY:
@@ -150,7 +149,7 @@ if DEPLOY:
     STATIC_ROOT = '/home/alcrm/crm/static'
 else:
     # STATIC_ROOT='./static'
-    STATICFILES_DIRS_CUSTOM=os.path.join(BASE_DIR,'static')
+    # STATICFILES_DIRS_CUSTOM=os.path.join(BASE_DIR,'static')
     STATICFILES_DIRS=[
         BASE_DIR / 'static'
     ]

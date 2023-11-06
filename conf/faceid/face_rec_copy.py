@@ -47,7 +47,7 @@ class FaceRecognition:
                                 # "face":frame_embedding
                             }
                             # current_faces.append({f"user {i}":un_face})
-                            current_faces.append(frame_embedding)
+                            current_faces.append(face)
                             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                             text_position = (x, y - 10)
                             font = cv2.FONT_HERSHEY_SIMPLEX
@@ -58,10 +58,11 @@ class FaceRecognition:
                             cv2.imwrite("./output.jpg", frame)
                             i+=1
                     self.limit2-=1
-                    current_faces = np.array(current_faces)
-                    index = faiss.IndexFlatL2(current_faces.shape[1])
-                    index.add(current_faces)
-                    print(index)
+                    print(current_faces)
+                    # current_faces = np.array(current_faces)
+                    # index = faiss.IndexFlatL2(current_faces.shape[1])
+                    # index.add(current_faces)
+                    # print(index)
                     return {"message":False}
             except KeyboardInterrupt:
                 pass

@@ -26,11 +26,12 @@ def global_update(self, request, *args, **kwargs):
             instance.user.username=data['user.username']
             instance.user.save()
     # HARDCODE
-    if self.request.user.is_authenticated and self.request.user.type_user and self.request.user.admin.types.title=="Tasischi":
-        password=data.get('user.password',False)
-        if password:
-            instance.user.set_password(password)
-            instance.user.save()
+    if self.request.user.is_authenticated:
+        if self.request.user.type_user and self.request.user.admin.types.title=="Tasischi":
+            password=data.get('user.password',False)
+            if password:
+                instance.user.set_password(password)
+                instance.user.save()
     if type(data.get('user.image')) not in [str,type(None)]:
         user_data = {
             'first_name': data.get('user.first_name'),
@@ -448,6 +449,16 @@ class Student_View(ModelViewSet):
                 return self.request.user.student
             return "ItIsNotStudent"
         return "AnonymousUser"
+
+    @action(detail=False, methods=['GET'])
+    def get_students_for_parent(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        students=[]
+        for student in queryset:
+            if len(student.parents.all())==0:
+                serializer = self.get_serializer(student, many=False)
+                students.append(serializer.data)
+        return Response(students)
 
     @swagger_auto_schema(
         operation_summary="Upload a single file.",

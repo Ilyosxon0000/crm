@@ -15,8 +15,7 @@ class Student_Debt(models.Model):
     updated_date=models.DateField(auto_now=True)
 
     def save(self,*args,**kwargs):
-        if self.balance>=0:
-            self.paid=True
+        self.paid=True if self.balance>=0 else False
         return super().save(*args,**kwargs)
 
 # This class is in come

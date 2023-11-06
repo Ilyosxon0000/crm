@@ -37,14 +37,14 @@ class FaceRecognition:
                             frame_embedding = face.embedding
                             x, y, w, h = face.bbox.astype(int)
                             # print(face)
-                            un_face={
-                                "x":x,
-                                "y":y,
-                                "w":w,
-                                "h":h,
-                                "face":frame_embedding
-                            }
-                            current_faces.append(un_face)
+                            # un_face={
+                            #     "x":x,
+                            #     "y":y,
+                            #     "w":w,
+                            #     "h":h,
+                            #     "face":frame_embedding
+                            # }
+                            # current_faces.append(un_face)
                             cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
                             for user in range(len(self.users)):
@@ -72,10 +72,10 @@ class FaceRecognition:
                                     self.limit1-=1
                                 else:
                                     return {"message":"src_embedding is None"}
+                        # print("current_faces:",current_faces) # TODO face if len(face)>1
                     elif len(faces)==False and self.limit2==0:
                         return {"message":"face hasn't"}
                     self.limit2-=1
-                    print(current_faces)
             except KeyboardInterrupt:
                 pass
             finally:

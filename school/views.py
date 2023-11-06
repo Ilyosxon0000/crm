@@ -134,7 +134,7 @@ class ClassView(ModelViewSet):
             }
             student_dict['attendances']=attendances_serializer.data
             attendances_arr.append(student_dict)
-        return Response(attendances_arr)
+        return Response(attendances_arr)#TODO
     
     @action(detail=True, methods=['GET'])
     def get_attendances_of_class_pk(self, request, pk=None):

@@ -1,8 +1,7 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth import get_user_model
-from .models import Type_of_Admin,Permission,Admin,Teacher
 from myconf import conf
+from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 
 

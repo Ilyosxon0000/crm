@@ -8,6 +8,7 @@ from django.conf import settings
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(required=False, style={"input_type": "password"},write_only=True)
     type_user=serializers.ReadOnlyField()
+    full_type=serializers.SerializerMethodField('get_type_dict')
     is_active=serializers.ReadOnlyField()
     image_thumbnail = serializers.ImageField(read_only=True)
     class Meta:
@@ -22,9 +23,16 @@ class UserSerializer(serializers.ModelSerializer):
             "last_name",
             "middle_name",
             "type_user",
+            "full_type",
             "is_active",
             ]
         extra_kwargs = {'password': {'write_only': True}}
+    
+    def get_type_dict(self,obj):
+        type=obj.type_user
+        if obj.type_user=="admin":
+            type=obj.admin.types.slug
+        return type
       
     def create(self, validated_data):
         password = validated_data.pop('password')
