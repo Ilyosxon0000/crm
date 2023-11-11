@@ -11,22 +11,14 @@ Follow these steps to set up and run the backend of the CRM website:
 Clone this repository to your local machine using the following command:
 
 ```bash
-git clone https://github.com/your-username/crm-backend.git
+git clone https://github.com/Ilyosxon0000/crm.git
 ```
 ### 2. Install requirements🗄️
 
 Install requirements.txt packages with pip:
 
 ```bash
-cd core
-pip install -r requirements.txt
-```
-### 3. Configure Environment Variables ⚙️
-
-Create a .env file in the project directory and set the necessary environment variables. In this case, you mentioned changing the DEPLOY variable to True:
-
-```bash
-SECRET_KEY = 'Django-SECRET_KEY'
-DEBUG = False
-DEPLOY = True
+cd crm
+pip install -r with_face_id.txt'
+python manage.py runserver
 ```
