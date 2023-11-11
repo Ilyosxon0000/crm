@@ -1,0 +1,5 @@
+request to {base_url}/api/v1/cron/set_assets/
+and create Company
+curl -X 'GET' \
+  'http://127.0.0.1:8000/api/v1/cron/set_assets/' \
+  -H 'accept: application/json'

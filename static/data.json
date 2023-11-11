@@ -1,0 +1,173 @@
+{   
+    "companies":[
+        {
+            "begin_date":"2023-09-01",
+            "end_date":"2024-05-31",
+            "study_price":"2_000_000",
+            "hostel_price":"700_000",
+            "camera_entrance":"http://192.168.1.143:4747/video",
+            "camera_exit":"http://192.168.1.143:4747/video"
+        }
+    ],
+    "types-admin":[
+        {"title": "Tasischi"},
+        {"title": "Manager"},
+        {"title": "Finance"},
+        {"title": "Admin"}
+    ],
+    "permissions-admin":[
+        {"title": "O'quvchini ma'lumotlarini tahrirlash"},
+        {"title": "Sinf hosil qilish"},
+        {"title": "Dars jadvali bilan ishlash"},
+        {"title": "Davomatlarni nazorat qilish"},
+        {"title": "O'quvchi to'lovini ko'rish(ReadOnly)"},
+        {"title": "O'qituvchi ma'lumotlarini tahrirlash"}
+    ],
+    "classes":[
+        {
+            "teacher_object": null,
+            "room_name": null,
+            "title": "1-A sinf",
+            "slug": "1-a-sinf",
+            "teacher": null,
+            "room": null
+        },
+        {
+            "teacher_object": null,
+            "room_name": null,
+            "title": "1-B sinf",
+            "slug": "1-b-sinf",
+            "teacher": null,
+            "room": null
+        },
+        {
+            "teacher_object": null,
+            "room_name": null,
+            "title": "2-A sinf",
+            "slug": "2-a-sinf",
+            "teacher": null,
+            "room": null
+        },
+        {
+            "teacher_object": null,
+            "room_name": null,
+            "title": "2-B sinf",
+            "slug": "2-b-sinf",
+            "teacher": null,
+            "room": null
+        },
+        {
+            "teacher_object": null,
+            "room_name": null,
+            "title": "3-A sinf",
+            "slug": "3-a-sinf",
+            "teacher": null,
+            "room": null
+        },
+        {
+            "teacher_object": null,
+            "room_name": null,
+            "title": "4-A sinf",
+            "slug": "4-a-sinf",
+            "teacher": null,
+            "room": null
+        },
+        {
+            "teacher_object": null,
+            "room_name": null,
+            "title": "4-B sinf",
+            "slug": "4-b-sinf",
+            "teacher": null,
+            "room": null
+        },
+        {
+            "teacher_object": null,
+            "room_name": null,
+            "title": "5-A sinf",
+            "slug": "5-a-sinf",
+            "teacher": null,
+            "room": null
+        },
+        {
+            "teacher_object": null,
+            "room_name": null,
+            "title": "5-B sinf",
+            "slug": "5-b-sinf",
+            "teacher": null,
+            "room": null
+        },
+        {
+            "teacher_object": null,
+            "room_name": null,
+            "title": "6-A sinf",
+            "slug": "6-a-sinf",
+            "teacher": null,
+            "room": null
+        },
+        {
+            "teacher_object": null,
+            "room_name": null,
+            "title": "6-B sinf",
+            "slug": "6-b-sinf",
+            "teacher": null,
+            "room": null
+        },
+        {
+            "teacher_object": null,
+            "room_name": null,
+            "title": "7-A sinf",
+            "slug": "7-a-sinf",
+            "teacher": null,
+            "room": null
+        },
+        {
+            "teacher_object": null,
+            "room_name": null,
+            "title": "7-B sinf",
+            "slug": "7-b-sinf",
+            "teacher": null,
+            "room": null
+        },
+        {
+            "teacher_object": null,
+            "room_name": null,
+            "title": "8-A sinf",
+            "slug": "8-a-sinf",
+            "teacher": null,
+            "room": null
+        },
+        {
+            "teacher_object": null,
+            "room_name": null,
+            "title": "8-B sinf",
+            "slug": "8-b-sinf",
+            "teacher": null,
+            "room": null
+        },
+        {
+            "teacher_object": null,
+            "room_name": null,
+            "title": "9-A sinf",
+            "slug": "9-a-sinf",
+            "teacher": null,
+            "room": null
+        },
+        {
+            "teacher_object": null,
+            "room_name": null,
+            "title": "10-A sinf",
+            "slug": "10-a-sinf",
+            "teacher": null,
+            "room": null
+        },
+        {
+            "teacher_object": null,
+            "room_name": null,
+            "title": "11-A sinf",
+            "slug": "11-a-sinf",
+            "teacher": null,
+            "room": null
+        }
+    ]
+    
+}
